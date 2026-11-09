@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIRU — Studio Spektrum · Ensiklopedia Interaktif Warna Biru</title>
+<meta name="description" content="Ensiklopedia & studio spektrum interaktif untuk warna biru — psikologi, sejarah Lapis Lazuli, kode warna teknis, dan laboratorium 3D WebGL.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Raleway:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+/* ============ BASE ============ */
+:root{
+  --font-sans:"Inter",system-ui,sans-serif;
+  --font-display:"Space Grotesk",sans-serif;
+  --font-mono:"JetBrains Mono",monospace;
+  --font-raleway:"Raleway",sans-serif;
+  --blue:#0E2AC5; --blue2:#2F69FF; --ink:#0a0a0a; --n700:#404040; --n500:#737373;
+  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+  --ease-bg:cubic-bezier(0.65,0,0.35,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%}
+body{overflow-x:hidden;background:#f7fafc;color:#1a1a1a;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-family:var(--font-sans);font-size:16px}
+body.locked{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;padding:0}
+img,svg{display:block;max-width:100%}
+::selection{background:rgba(47,105,255,.22)}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(14,42,197,0.18);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(14,42,197,0.32)}
+.mono{font-family:var(--font-mono)}
+.ic{width:16px;height:16px;flex:none}
+
+/* ============ BG LAYER ============ */
+#bg{position:fixed;inset:0;z-index:-10;background:radial-gradient(circle at center,#ffffff 0%,#ecefff 35%,#c2d1ff 100%);transition:background 1.2s var(--ease-bg)}
+#bg.stage-1{background:radial-gradient(circle at center,#ffffff 0%,#f0fdfa 38%,#ccfbf1 100%)}
+#bg.stage-2{background:radial-gradient(circle at center,#ffffff 0%,#eff6ff 38%,#dbeafe 100%)}
+
+/* ============ SCENE SHELL ============ */
+#sceneShell{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#sceneShell canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#drawer{width:100%}
+@media(min-width:640px){#drawer{width:420px}}
+
+/* ============ ENTRANCE SYSTEMS ============ */
+.en{opacity:0;transition:opacity .9s var(--ease-out-expo),transform .9s var(--ease-out-expo)}
+.en.in{opacity:1;transform:none}
+.en-hdr{transform:translateY(-16px);transition-duration:.8s}
+.en-eyebrow{transform:translateY(14px);transition-delay:.15s}
+.en-headline{transform:translateY(22px);transition-duration:1s;transition-delay:.28s}
+.en-side{transform:translateY(16px);transition-delay:.45s}
+.reveal{opacity:0;transform:translateY(42px);filter:blur(8px);transition:opacity 1.2s var(--ease-out-expo),transform 1.2s var(--ease-out-expo),filter 1.2s var(--ease-out-expo);transition-delay:var(--rd,0s)}
+.reveal.in{opacity:1;transform:translateY(0);filter:blur(0)}
+@media (prefers-reduced-motion:reduce){.reveal,.en{transition:none;filter:none}}
+
+/* ============ HEADER ============ */
+#siteHeader{position:fixed;top:0;left:0;right:0;z-index:30;height:80px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+@media(min-width:768px){#siteHeader{height:96px;padding:0 48px}}
+.wordmark{font-family:var(--font-display);font-weight:900;font-size:18px;letter-spacing:.25em;color:var(--ink);pointer-events:auto}
+@media(min-width:768px){.wordmark{font-size:20px}}
+.hdr-nav{display:none;gap:40px;pointer-events:auto}
+@media(min-width:768px){.hdr-nav{display:flex}}
+.hdr-nav a{font-family:var(--font-raleway);font-size:14px;font-weight:500;transition:opacity .25s}
+.hdr-nav a:hover{opacity:.6}
+.hdr-right{display:flex;align-items:center;gap:10px;pointer-events:auto}
+@media(min-width:768px){.hdr-right{gap:12px}}
+.icon-btn{width:40px;height:40px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 1.5px 2px rgba(255,255,255,.7),0 8px 30px rgba(0,0,0,.04);transition:background .25s,transform .25s;color:var(--ink)}
+.icon-btn .ic{width:16px;height:16px}
+@media(min-width:768px){.icon-btn{width:44px;height:44px}}
+.icon-btn:hover{background:rgba(255,255,255,.3)}
+.icon-btn:active{transform:scale(.94)}
+#siteHeader.on-dark .wordmark,
+#siteHeader.on-dark .hdr-nav a{color:#fff}
+#siteHeader.on-dark .icon-btn,
+#siteHeader.on-dark .test-pill{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);box-shadow:inset 0 1.5px 2px rgba(255,255,255,.25),0 8px 30px rgba(0,0,0,.2);color:#fff}
+.test-pill{display:flex;align-items:center;gap:2px;padding:6px 6px 6px 20px;border-radius:999px;background:rgba(255,255,255,.2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 2px rgba(255,255,255,.7),0 8px 30px rgba(0,0,0,.04);font-family:var(--font-raleway);font-size:13px;font-weight:500;transition:background .25s;color:var(--ink)}
+.test-pill span.lbl{margin-right:6px}
+@media(min-width:768px){.test-pill{padding-left:24px;font-size:14px}}
+.test-pill:hover{background:rgba(255,255,255,.3)}
+.test-orb{width:32px;height:32px;border-radius:999px;background:radial-gradient(circle at 50% 30%,#5175ff 0%,#0e2ac5 55%,#020b40 100%);display:grid;place-items:center;color:#fff;transition:transform .25s}
+.test-orb .ic{width:14px;height:14px}
+.test-pill:hover .test-orb{transform:scale(1.05)}
+
+/* ============ HERO ============ */
+.s-hero{position:relative;z-index:10;min-height:100svh;display:flex;align-items:flex-end;pointer-events:none;padding:0 24px 48px}
+@media(min-width:768px){.s-hero{padding:0 48px 56px}}
+.hero-inner{width:100%;display:flex;flex-direction:column;justify-content:space-between;gap:32px;pointer-events:auto}
+@media(min-width:768px){.hero-inner{flex-direction:row;align-items:flex-end}}
+.hero-col{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.eyebrow{font-family:var(--font-raleway);font-weight:500;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+@media(min-width:768px){.eyebrow{font-size:14px;margin-bottom:24px}}
+.hero-title{font-family:var(--font-raleway);font-weight:500;font-size:2.6rem;line-height:.95;letter-spacing:-0.05em;color:#0a0a0a;margin:0}
+@media(min-width:640px){.hero-title{font-size:3.75rem}}
+@media(min-width:768px){.hero-title{font-size:clamp(46px,5.6vw,84px);line-height:1;white-space:nowrap}}
+@media(min-width:1280px){.hero-title{font-size:90px}}
+.hero-right{display:flex;flex-direction:column;align-items:flex-start;max-width:440px}
+@media(min-width:768px){.hero-right{width:290px;max-width:none}}
+.hero-desc{font-family:var(--font-raleway);font-weight:500;font-size:15px;line-height:1.4;color:#1a1a1a;margin:0}
+.hero-credit{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--n500);margin-top:20px}
+.hero-cue{display:none;margin-top:16px;color:var(--n500)}
+@media(min-width:768px){.hero-cue{display:flex;align-items:center;gap:8px}}
+.hero-cue .ic{width:14px;height:14px}
+.hero-cue span{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.animate-pulse{animation:pulse2 2s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ============ SECTION SHELLS ============ */
+main{position:relative;z-index:10}
+.section{position:relative;z-index:10;pointer-events:none}
+.pe{pointer-events:auto}
+.section-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(14,42,197,.8)}
+.h2{font-family:var(--font-raleway);font-weight:500;letter-spacing:-0.02em;color:#0a0a0a;margin:24px 0 0;font-size:2.6rem;line-height:1.0}
+@media(min-width:640px){.h2{font-size:3.75rem}}
+@media(min-width:768px){.h2{font-size:74px;line-height:.94}}
+.h2-sm{font-size:2.25rem;line-height:.95;margin-top:16px}
+@media(min-width:768px){.h2-sm{font-size:68px}}
+.sub{font-family:var(--font-raleway);font-size:16px;line-height:1.6;color:var(--n700);margin:16px 0 0;max-width:42rem}
+.lead{font-family:var(--font-raleway);font-size:16px;line-height:1.6;color:var(--n700);margin:28px 0 0;max-width:32rem}
+@media(min-width:768px){.lead{font-size:18px}}
+
+/* ============ EDUKASI ============ */
+.s-edu{min-height:100svh;display:flex;align-items:center;padding:128px 24px 144px}
+@media(min-width:768px){.s-edu{padding:160px 48px 144px}}
+.edu-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:start}
+@media(min-width:1024px){.edu-grid{grid-template-columns:repeat(12,1fr);gap:56px}}
+.edu-left{grid-column:span 1;min-width:0}
+@media(min-width:1024px){.edu-left{grid-column:span 6}}
+.edu-right{grid-column:span 1;display:flex;flex-direction:column;gap:16px;min-width:0}
+@media(min-width:1024px){.edu-right{grid-column:span 6;padding-top:8px}}
+.pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.pill{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:9px 16px;border-radius:999px;border:1px solid rgba(14,42,197,.18);background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--n700);transition:all .25s}
+.pill:hover{border-color:rgba(14,42,197,.45);transform:translateY(-1px)}
+.pill.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 24px -6px rgba(14,42,197,.45)}
+.edu-card{border-radius:1.4rem;padding:1px;background:linear-gradient(145deg,rgba(14,42,197,.35),rgba(47,105,255,.08) 45%,rgba(255,255,255,.55));box-shadow:0 14px 40px -12px rgba(14,42,197,.18);pointer-events:auto;transition:opacity .5s ease,transform .5s var(--ease-out-expo),filter .5s ease,box-shadow .5s ease}
+.edu-inner{border-radius:1.35rem;background:rgba(255,255,255,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:20px 24px;position:relative;overflow:hidden}
+.edu-inner::before{content:"";position:absolute;top:0;left:14%;right:14%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent)}
+.edu-index{font-family:var(--font-mono);font-size:10px;letter-spacing:.22em;color:rgba(14,42,197,.75)}
+.edu-card h3{font-family:var(--font-raleway);font-weight:600;font-size:19px;margin:8px 0 0;color:var(--ink);letter-spacing:-.01em}
+.edu-value{margin-top:12px;display:inline-block;font-family:var(--font-mono);font-size:10.5px;color:var(--blue);background:rgba(14,42,197,.08);border:1px solid rgba(14,42,197,.14);padding:6px 10px;border-radius:8px}
+.edu-body{margin:12px 0 0;font-size:14px;line-height:1.65;color:var(--n700)}
+.edu-body b,.edu-body strong{font-weight:600;color:var(--ink)}
+.edu-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.edu-tags span{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.55);border:1px solid rgba(14,42,197,.12);color:#444}
+.edu-card.dim{opacity:.22;filter:saturate(.15) blur(1.5px);transform:scale(.985)}
+.edu-card.match{box-shadow:0 18px 50px -12px rgba(14,42,197,.35)}
+
+/* ============ KATALOG ============ */
+.s-katalog{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:128px 24px}
+@media(min-width:768px){.s-katalog{padding:160px 48px}}
+.catalog-grid{margin-top:40px;display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:640px){.catalog-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.catalog-grid{grid-template-columns:repeat(3,1fr)}}
+.kc{border-radius:1.4rem;padding:1px;background:linear-gradient(145deg,rgba(14,42,197,.3),rgba(255,255,255,.5) 40%,rgba(47,105,255,.14));box-shadow:0 14px 40px -12px rgba(14,42,197,.18);pointer-events:auto}
+.kc-inner{border-radius:1.35rem;background:rgba(255,255,255,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:14px 14px 16px;position:relative}
+.kc-banner{position:relative;height:112px;border-radius:12px;overflow:hidden}
+.kc-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,0) 45%);pointer-events:none}
+.kc-apply{position:absolute;top:10px;right:10px;z-index:2;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--ink);border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px rgba(10,20,60,.18);transition:transform .2s,background .2s}
+.kc-apply:hover{transform:translateY(-1px);background:#fff}
+.kc-apply:active{transform:scale(.93)}
+.kc h3{font-family:var(--font-raleway);font-weight:700;font-size:20px;margin:14px 0 0;color:var(--ink)}
+.kc .char{font-size:12px;color:var(--n500);margin-top:4px;line-height:1.5}
+.code-rows{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.code-row{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.5);border:1px solid rgba(14,42,197,.1);font-family:var(--font-mono);font-size:12px;transition:all .2s;text-align:left;color:var(--ink)}
+.code-row:hover{background:rgba(255,255,255,.85);border-color:rgba(14,42,197,.28)}
+.code-row .fmt{font-size:9px;letter-spacing:.14em;color:var(--blue);opacity:.75;width:40px;flex:none}
+.code-row .val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code-row .ic{width:13px;height:13px;color:var(--n500)}
+.code-row.ok{border-color:var(--blue);background:rgba(14,42,197,.08)}
+
+/* ============ PALET ============ */
+.s-palet{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:128px 24px}
+@media(min-width:768px){.s-palet{padding:160px 48px}}
+.palet-grid{margin-top:40px;display:grid;gap:32px;grid-template-columns:1fr}
+@media(min-width:1024px){.palet-grid{grid-template-columns:repeat(12,1fr)}}
+.pl-left{grid-column:span 1;display:flex;flex-direction:column;gap:32px}
+.pl-right{grid-column:span 1}
+@media(min-width:1024px){.pl-left{grid-column:span 5}.pl-right{grid-column:span 7}}
+.glass-card{border-radius:1.4rem;padding:1px;background:linear-gradient(145deg,rgba(14,42,197,.28),rgba(255,255,255,.5) 40%,rgba(47,105,255,.14));box-shadow:0 14px 40px -12px rgba(14,42,197,.18);pointer-events:auto}
+.glass-inner{border-radius:1.35rem;background:rgba(255,255,255,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:22px}
+.g-title{font-family:var(--font-raleway);font-weight:600;font-size:17px;color:var(--ink);margin:0;letter-spacing:-.01em}
+.g-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--n500);margin-top:4px}
+.g-body{margin:12px 0 0;font-size:13.5px;line-height:1.6;color:var(--n700)}
+.g-body b{font-weight:600;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10.5px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid rgba(14,42,197,.12);transition:all .2s;color:var(--ink)}
+.chip i{width:14px;height:14px;border-radius:5px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);flex:none}
+.chip:hover{transform:translateY(-1px);border-color:rgba(14,42,197,.4)}
+.prop-bar{display:flex;height:52px;border-radius:14px;overflow:hidden;margin-top:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+.pb-seg{transition:flex .4s}
+.prop-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--n500)}
+.grad-bar{height:52px;border-radius:14px;margin-top:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+.tabs{display:flex;gap:6px;padding:4px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.6);border-radius:999px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.tab-btn{flex:1;min-width:0;padding:9px 8px;border-radius:999px;font-family:var(--font-raleway);font-size:12.5px;font-weight:600;color:#555;transition:all .25s;text-align:center;white-space:nowrap}
+@media(min-width:768px){.tab-btn{font-size:13.5px;padding:9px 12px}}
+.tab-btn.active{background:var(--ink);color:#fff;box-shadow:0 10px 24px -8px rgba(0,0,0,.4)}
+.pane{display:none}
+.pane.active{display:block;animation:fadeup .5s var(--ease-out-expo)}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.rule-wrap{margin-top:16px}
+.rule-bar{display:flex;height:44px;border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+.rule-bar i{display:block}
+.mini-card{margin-top:18px;border-radius:16px;background:#0A192F;padding:18px;color:#E2E8F0;box-shadow:0 20px 50px -18px rgba(10,25,47,.55);position:relative;overflow:hidden}
+.mc-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(226,232,240,.55)}
+.mc-badge{color:#FFA94D;display:flex;align-items:center;gap:6px}
+.mc-badge i{width:7px;height:7px;border-radius:99px;background:#FF6B00;animation:pulse2 1.6s infinite}
+.mc-big{font-family:var(--font-raleway);font-weight:700;font-size:30px;color:#fff;margin-top:10px}
+.mc-sub{color:#94A3B8;font-size:12px;margin-top:2px}
+.mc-bars{display:flex;align-items:flex-end;gap:6px;height:56px;margin-top:14px}
+.mc-bars i{flex:1;border-radius:6px 6px 3px 3px;background:rgba(47,105,255,.25)}
+.mc-cta{margin-top:16px;width:100%;background:#FF6B00;color:#fff;font-family:var(--font-raleway);font-weight:600;font-size:13px;padding:10px 16px;border-radius:12px;transition:filter .2s}
+.mc-cta:hover{filter:brightness(1.08)}
+.room-mini{display:grid;grid-template-columns:3fr 2fr 1fr;gap:8px;margin-top:18px}
+.room-mini .tile{border-radius:12px;min-height:64px;display:flex;align-items:flex-end;padding:8px;font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#0a0a0a}
+.f-stack{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.f-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;border:1px solid rgba(14,42,197,.1)}
+.f-row i{width:20px;height:20px;border-radius:7px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.f-row .n{font-family:var(--font-raleway);font-weight:600;font-size:13px;color:var(--ink)}
+.f-row .t{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--n500);margin-left:auto}
+.ul-check{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.55;color:var(--n700)}
+.ul-check li{display:flex;gap:10px}
+.ul-check li::before{content:"";width:6px;height:6px;border-radius:99px;background:var(--blue2);margin-top:7px;flex:none}
+
+/* ============ LAB ============ */
+.s-lab{min-height:100svh;padding:128px 24px}
+@media(min-width:768px){.s-lab{padding:160px 48px}}
+.lab-grid{margin-top:48px;display:grid;gap:32px;grid-template-columns:1fr;align-items:stretch}
+@media(min-width:1024px){.lab-grid{grid-template-columns:repeat(12,1fr)}}
+.lab-left{grid-column:span 1}
+.lab-right{grid-column:span 1}
+@media(min-width:1024px){.lab-left{grid-column:span 5}.lab-right{grid-column:span 7}}
+.panel-head h3{font-family:var(--font-raleway);font-weight:600;font-size:19px;margin:0;color:var(--ink);letter-spacing:-.01em}
+.panel-head p{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--n500);margin:5px 0 0}
+.sld{margin-top:20px}
+.sld-lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.sld-name{font-family:var(--font-raleway);font-weight:600;font-size:13.5px;color:var(--ink)}
+.sld-val{font-family:var(--font-mono);font-size:11px;color:var(--blue);font-weight:700}
+input[type=range].hslider{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;cursor:pointer;--p:50%}
+input[type=range].hslider::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--blue2) var(--p),rgba(255,255,255,.6) var(--p));border:1px solid rgba(255,255,255,.65);box-shadow:inset 0 1px 3px rgba(14,42,197,.14)}
+input[type=range].hslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#dbe6ff 60%,#9db4ff);border:1px solid rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(14,42,197,.28);margin-top:-8px}
+input[type=range].hslider::-moz-range-track{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--blue2) var(--p),rgba(255,255,255,.6) var(--p));border:1px solid rgba(255,255,255,.65)}
+input[type=range].hslider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#dbe6ff 60%,#9db4ff);border:1px solid rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(14,42,197,.28)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.preset{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;padding:8px 12px;border-radius:999px;border:1px solid rgba(14,42,197,.16);background:rgba(255,255,255,.55);transition:all .2s;color:var(--ink)}
+.preset:hover{background:var(--blue);color:#fff;border-color:var(--blue);transform:translateY(-1px)}
+.readout{margin-top:22px;display:flex;gap:14px;padding:14px;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(14,42,197,.1)}
+.ro-swatch{width:86px;height:86px;border-radius:14px;flex:none;background:#2F69FF;box-shadow:inset 0 2px 6px rgba(255,255,255,.5),0 10px 22px -8px rgba(14,42,197,.5);transition:background .25s}
+.ro-vals{display:flex;flex-direction:column;gap:6px;justify-content:center;font-family:var(--font-mono);min-width:0}
+.ro-item{display:flex;gap:10px;font-size:11px;min-width:0}
+.ro-item span{color:var(--n500);width:42px;flex:none;letter-spacing:.1em}
+.ro-item b{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker-actions{margin-top:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn-blue{background:var(--blue);color:#fff;font-family:var(--font-raleway);font-weight:600;font-size:13.5px;padding:11px 18px;border-radius:999px;box-shadow:0 10px 26px -8px rgba(14,42,197,.5);transition:all .2s}
+.btn-blue:hover{transform:translateY(-1px);background:#0b23ad}
+.btn-blue:active{transform:scale(.96)}
+.btn-blue.done{background:#0f8a3d}
+.sync-row{display:flex;align-items:center;gap:10px;flex:1;min-width:230px}
+.sync-row label{font-size:12.5px;color:var(--n700);font-family:var(--font-raleway);font-weight:500}
+.switch{width:46px;height:26px;border-radius:99px;background:#dbe1ec;position:relative;transition:background .3s;flex:none;border:1px solid rgba(14,42,197,.12)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 2px 6px rgba(10,20,60,.25)}
+.switch.on{background:var(--blue)}
+.switch.on::after{transform:translateX(20px)}
+
+/* Mockup simulator */
+.mock-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.mock-tab{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;padding:9px 13px;border-radius:999px;border:1px solid rgba(14,42,197,.16);background:rgba(255,255,255,.55);transition:all .2s;color:var(--ink)}
+.mock-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 10px 24px -8px rgba(14,42,197,.5)}
+.mock-stage-wrap{margin-top:18px;flex:1;position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#fbfdff,#eef2f7);min-height:390px;box-shadow:inset 0 0 0 1px rgba(14,42,197,.08)}
+.mock-stage{position:absolute;inset:0;opacity:0;transition:opacity .45s ease;pointer-events:none}
+.mock-stage.active{opacity:1;pointer-events:auto}
+.mock-stage > svg.room-svg{position:absolute;inset:0;width:100%;height:100%}
+.fashion-wrap{position:absolute;inset:0;display:grid;place-items:center;padding:20px}
+.fashion-wrap svg{max-height:100%;width:auto;max-width:100%}
+/* Web UI mock */
+.ui-win{position:absolute;inset:24px;border-radius:18px;background:#fff;box-shadow:0 30px 80px -20px rgba(10,20,60,.35);overflow:hidden;display:flex;flex-direction:column}
+.ui-topbar{height:34px;display:flex;gap:6px;align-items:center;padding:0 12px;border-bottom:1px solid #eef1f6;flex:none}
+.ui-topbar i{width:9px;height:9px;border-radius:99px;background:#e6eaef}
+.ui-hero{padding:18px 22px;color:#fff;background:linear-gradient(135deg,var(--m-acc,#2F69FF),var(--m-acc-deep,#0A33BF));transition:background .3s}
+.ui-hero .k{font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+.ui-hero .big{font-family:var(--font-raleway);font-weight:700;font-size:20px;margin-top:6px}
+@media(min-width:768px){.ui-hero .big{font-size:24px}}
+.ui-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:var(--font-raleway);transition:background .2s}
+.ui-btn:hover{background:rgba(255,255,255,.28)}
+.ui-btn.solid{background:var(--m-comp,#FF6B00);border-color:transparent;color:#fff}
+.ui-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 20px;flex:1;min-height:0}
+@media(max-width:560px){.ui-row{grid-template-columns:1fr}}
+.ui-card{border:1px solid #eef1f6;border-radius:14px;padding:13px;min-width:0}
+.ui-k{font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#94a3b8}
+.ui-kpi{font-family:var(--font-raleway);font-weight:700;font-size:22px;color:var(--ink);margin-top:4px}
+.ui-delta{font-size:11px;font-weight:700;color:var(--m-acc-deep,#0A33BF);display:inline-flex;align-items:center;gap:4px}
+.ui-bars{display:flex;align-items:flex-end;gap:5px;height:46px;margin-top:10px}
+.ui-bars i{flex:1;border-radius:5px 5px 2px 2px;background:var(--m-acc-light,#dbeafe)}
+.ui-bars i.hot{background:var(--m-acc,#2F69FF)}
+.rings{display:flex;gap:16px;align-items:center;margin-top:10px}
+.ring{position:relative;width:66px;height:66px}
+.ring svg{width:66px;height:66px;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--m-acc-deep,#0A33BF)}
+.ui-badges{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 18px}
+.ui-badge{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:999px;background:var(--m-acc-light,#dbeafe);color:var(--m-acc-deep,#0A33BF);transition:all .3s}
+
+/* ============ QUIZ ============ */
+.quiz-card{margin-top:40px}
+.quiz-tabs{display:inline-flex;gap:6px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7);padding:4px;border-radius:999px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:100%}
+.q-tab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;font-family:var(--font-raleway);font-weight:600;font-size:12.5px;color:#444;transition:all .25s;white-space:nowrap}
+@media(min-width:640px){.q-tab{font-size:13.5px}}
+.q-tab .ic{width:14px;height:14px}
+.q-tab.active{background:var(--blue);color:#fff;box-shadow:0 10px 24px -8px rgba(14,42,197,.5)}
+.quiz-pane{display:none;margin-top:22px}
+.quiz-pane.active{display:block;animation:fadeup .5s var(--ease-out-expo)}
+.q-progress{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(14,42,197,.75)}
+.q-text{font-family:var(--font-raleway);font-weight:600;font-size:20px;color:var(--ink);margin-top:10px}
+.q-opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
+@media(min-width:640px){.q-opts{grid-template-columns:1fr 1fr}}
+.q-opt{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(14,42,197,.12);font-size:13.5px;text-align:left;transition:all .2s;color:#1a1a1a;font-family:var(--font-raleway);font-weight:500}
+.q-opt:hover{border-color:var(--blue);background:#fff;transform:translateY(-1px)}
+.q-opt.pick{border-color:var(--blue);background:rgba(14,42,197,.1)}
+.q-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.btn-ghost{padding:11px 18px;border-radius:999px;border:1px solid rgba(14,42,197,.25);font-weight:600;font-size:13.5px;font-family:var(--font-raleway);transition:all .2s;color:var(--ink);display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{background:rgba(14,42,197,.06);transform:translateY(-1px)}
+.badge-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.badge-swatch{width:54px;height:54px;border-radius:16px;flex:none;box-shadow:inset 0 2px 8px rgba(255,255,255,.55),0 14px 30px -10px rgba(14,42,197,.45)}
+.result-h{font-family:var(--font-raleway);font-weight:700;font-size:23px;color:var(--ink)}
+.result-hex{font-family:var(--font-mono);font-size:12px;color:var(--blue);font-weight:700}
+.result-desc{margin-top:14px;font-size:14px;line-height:1.65;color:var(--n700)}
+.spec-status{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11px;color:var(--n700)}
+.spec-status b{color:var(--blue)}
+.spec-grid{display:grid;gap:10px;margin-top:16px;max-width:460px}
+.spec-grid button{aspect-ratio:1;border-radius:12px;cursor:pointer;transition:transform .15s;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.spec-grid button:hover{transform:scale(1.04)}
+.spec-grid button.ok{outline:3px solid #22c55e;outline-offset:2px;animation:pop .4s var(--ease-out-expo)}
+.spec-grid button.bad{outline:3px solid #ef4444;outline-offset:2px;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+.spec-feedback{font-family:var(--font-mono);font-size:11px;margin-top:14px;color:var(--blue);min-height:16px}
+
+/* ============ FOOTER ============ */
+footer{position:relative;z-index:10;background:#0a0a0a;color:#fff;border-radius:2.5rem 2.5rem 0 0;overflow:hidden;pointer-events:auto}
+@media(min-width:768px){footer{border-radius:4rem 4rem 0 0}}
+.bloom{position:absolute;border-radius:999px;filter:blur(40px);pointer-events:none}
+.bloom-tr{width:28rem;height:28rem;right:-10rem;top:-10rem;background:radial-gradient(circle,#2f69ff66 0%,transparent 65%)}
+.bloom-bl{width:32rem;height:32rem;left:-12rem;bottom:-12rem;background:radial-gradient(circle,#5175ff44 0%,transparent 65%)}
+.marquee{border-bottom:1px solid rgba(255,255,255,.1);padding:20px 0;overflow:hidden;position:relative}
+.mq-track{display:inline-flex;align-items:center;white-space:nowrap;will-change:transform;animation:mq 26s linear infinite}
+.mq-track .word{font-family:var(--font-raleway);font-weight:500;font-size:clamp(28px,6vw,64px);color:rgba(255,255,255,.9);padding:0 32px;line-height:1.15}
+.mq-dot{width:10px;height:10px;border-radius:99px;background:#2f69ff;flex:none}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.f-body{padding:64px 24px 40px;display:grid;gap:48px;grid-template-columns:1fr;position:relative}
+@media(min-width:1024px){.f-body{grid-template-columns:repeat(12,1fr);padding:96px 48px 40px}}
+.f-cta{grid-column:span 1;display:flex;flex-direction:column;align-items:flex-start}
+.f-links{grid-column:span 1}
+@media(min-width:1024px){.f-cta{grid-column:span 5}.f-links{grid-column:span 7}}
+.f-label{font-family:var(--font-mono);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.f-h{font-family:var(--font-raleway);font-weight:500;font-size:2.25rem;line-height:.95;color:#fff;margin-top:16px;letter-spacing:-.02em}
+@media(min-width:768px){.f-h{font-size:60px}}
+.f-btn{margin-top:26px;display:inline-flex;align-items:center;gap:12px;padding:8px 8px 8px 20px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);font-family:var(--font-raleway);font-weight:500;font-size:14px;transition:all .25s;color:#fff}
+.f-btn:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.f-orb{width:40px;height:40px;border-radius:999px;background:radial-gradient(circle at 50% 30%,#5175ff 0%,#0e2ac5 55%,#020b40 100%);display:grid;place-items:center;color:#fff;flex:none;transition:transform .25s}
+.f-orb .ic{width:16px;height:16px}
+.f-btn:hover .f-orb{transform:scale(1.06)}
+.f-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:32px}
+@media(min-width:640px){.f-cols{grid-template-columns:repeat(3,1fr)}}
+.f-col h4{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 14px;font-weight:500}
+.f-col a{display:block;color:rgba(255,255,255,.75);font-size:14px;line-height:2.1;transition:color .2s}
+.f-col a:hover{color:#fff}
+.f-bottom{margin-top:80px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+@media(min-width:768px){.f-bottom{flex-direction:row;justify-content:space-between;align-items:center}}
+.f-id{display:flex;align-items:center;gap:12px}
+.f-id .wm{font-family:var(--font-display);font-weight:900;letter-spacing:.22em;font-size:15px;color:#fff}
+.f-id .dot{width:9px;height:9px;border-radius:99px;background:#2f69ff}
+.f-id small{font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.4)}
+.f-social{display:flex;gap:10px}
+.f-social button{width:40px;height:40px;border-radius:999px;border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;color:rgba(255,255,255,.85);transition:all .25s}
+.f-social button:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.f-social .ic{width:16px;height:16px}
+
+/* ============ STUDIO DRAWER ============ */
+#drawerScrim{position:fixed;inset:0;background:rgba(10,10,10,.2);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:40;opacity:0;pointer-events:none;transition:opacity .4s}
+#drawerScrim.open{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;height:100%;background:rgba(255,255,255,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid #f5f5f5;z-index:50;padding:32px;display:flex;flex-direction:column;gap:0;transform:translateX(100%);transition:transform .55s var(--ease-out-expo);overflow-y:auto}
+#drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;justify-content:space-between}
+.drawer-title{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:900;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink)}
+.drawer-title .ic{width:15px;height:15px;color:var(--blue)}
+.drawer-close{width:36px;height:36px;border-radius:999px;border:1px solid rgba(14,42,197,.14);display:grid;place-items:center;transition:all .2s;color:var(--ink)}
+.drawer-close:hover{background:rgba(14,42,197,.06);transform:rotate(90deg)}
+.drawer-note{font-family:var(--font-mono);font-size:12px;font-style:italic;color:#a3a3a3;line-height:1.6;margin:22px 0 0}
+.drawer-caption{font-family:var(--font-raleway);font-weight:600;font-size:14px;color:var(--ink);margin:28px 0 12px}
+.theme-card{width:100%;text-align:left;border-radius:12px;border:1px solid rgba(14,42,197,.12);padding:16px;background:rgba(255,255,255,.5);transition:all .25s;display:flex;gap:14px;align-items:flex-start}
+.theme-card + .theme-card{margin-top:10px}
+.theme-card .th-sw{width:34px;height:34px;border-radius:10px;flex:none;box-shadow:inset 0 2px 4px rgba(255,255,255,.6),0 8px 18px -6px rgba(10,20,60,.4)}
+.theme-card .nm{font-family:var(--font-raleway);font-weight:600;font-size:14px;color:var(--ink)}
+.theme-card .ds{font-size:12px;color:var(--n700);margin-top:3px;line-height:1.5}
+.theme-card:hover{transform:translateY(-1px);border-color:rgba(14,42,197,.35)}
+.theme-card.selected{background:var(--ink);border-color:var(--ink);color:#fff;transform:scale(1.02);box-shadow:0 18px 40px -14px rgba(0,0,0,.5)}
+.theme-card.selected .nm{color:#fff}
+.theme-card.selected .ds{color:rgba(255,255,255,.7)}
+.drawer-foot{margin-top:auto;padding-top:28px}
+.drawer-foot .mono-row{font-family:var(--font-mono);font-size:9px;color:#a3a3a3;letter-spacing:.12em;text-transform:uppercase;line-height:2}
+.btn-reset{width:100%;margin-top:14px;padding:12px;border-radius:999px;border:1px solid rgba(14,42,197,.25);font-family:var(--font-raleway);font-weight:600;font-size:13.5px;transition:all .2s;color:var(--ink)}
+.btn-reset:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ============ TOAST ============ */
+#toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:rgba(10,10,10,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font-family:var(--font-mono);font-size:12px;box-shadow:0 18px 44px -12px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);animation:toastIn .45s var(--ease-out-expo);max-width:92vw}
+.toast .ic{width:14px;height:14px;color:#4ade80}
+.toast b{color:#93b4ff;font-weight:600}
+.toast.out{animation:toastOut .35s forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
+
+/* ============ LOADER ============ */
+#loader{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 42%,#ffffff 0%,#eef2ff 45%,#dbe4ff 100%);transition:opacity .7s ease}
+#loader.done{opacity:0;pointer-events:none}
+.loader-col{display:flex;flex-direction:column;align-items:center;gap:26px}
+.loader-col>*{animation:ldpop .8s var(--ease-out-expo) both}
+.loader-status{font-family:var(--font-mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#6b7bb5;text-align:center;padding:0 24px;animation-delay:.05s}
+.loader-bar{width:clamp(180px,32vw,280px);height:2px;border-radius:99px;background:rgba(14,42,197,.14);overflow:hidden;animation-delay:.15s}
+.loader-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#5175ff 0%,#0e2ac5 100%);box-shadow:0 0 14px rgba(47,105,255,.55)}
+.loader-count{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--blue);font-weight:700;font-variant-numeric:tabular-nums;animation-delay:.25s}
+@keyframes ldpop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body class="locked">
+<div id="bg"></div>
+<div id="sceneShell"></div>
+
+<!-- ================= HEADER ================= -->
+<header id="siteHeader" class="en en-hdr">
+  <a class="wordmark" href="#top">BIRU.</a>
+  <nav class="hdr-nav">
+    <a href="#edukasi">Edukasi</a>
+    <a href="#katalog">Katalog Kode</a>
+    <a href="#palet">Teori Palet</a>
+    <a href="#lab">Lab Interaktif</a>
+  </nav>
+  <div class="hdr-right">
+    <button id="btnDrawer" class="icon-btn" aria-label="Buka Studio Controls">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+    </button>
+    <a class="test-pill" href="#lab"><span class="lbl">Uji Warna</span><span class="test-orb"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></a>
+  </div>
+</header>
+
+<main>
+<!-- ================= 01 HERO ================= -->
+<section class="s-hero" id="top">
+  <div class="hero-inner pe">
+    <div class="hero-col">
+      <div class="eyebrow en en-eyebrow">[ Ensiklopedia &amp; Eksplorasi Spektrum ]</div>
+      <h1 class="hero-title en en-headline">Lebih tenang. Lebih biru.</h1>
+    </div>
+    <div class="hero-right en en-side">
+      <p class="hero-desc">Menyelami psikologi ketenangan, sejarah pigmen Lapis Lazuli yang langka, fenomena optik alam, hingga kode presisi untuk desainer modern.</p>
+      <div class="hero-credit">450–495 NM — PANJANG GELOMBANG CAHAYA</div>
+      <div class="hero-cue animate-pulse">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+        <span>Gulir ke bawah</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 EDUKASI ================= -->
+<section class="section s-edu" id="edukasi">
+  <div class="edu-grid" style="width:100%">
+    <div class="edu-left">
+      <div class="section-label reveal">[ 01 — Konten Edukasi &amp; Informasi ]</div>
+      <h2 class="h2 reveal" style="--rd:.1s">Makna, Sejarah,<br>&amp; Sains Alam.</h2>
+      <p class="lead reveal" style="--rd:.2s">Saat bola-bola spektrum ini jatuh mengikuti gravitasi, kenali bagaimana warna biru membentuk persepsi manusia, peradaban kuno, dan fenomena fisika di bumi.</p>
+      <div class="pill-row reveal pe" style="--rd:.28s" id="topicPills">
+        <button class="pill active" data-topic="all">Semua</button>
+        <button class="pill" data-topic="psikologi">Psikologi</button>
+        <button class="pill" data-topic="sejarah">Sejarah</button>
+        <button class="pill" data-topic="sains">Sains &amp; Alam</button>
+      </div>
+    </div>
+    <div class="edu-right reveal" style="--rd:.25s">
+      <article class="edu-card" data-topic="psikologi">
+        <div class="edu-inner">
+          <div class="edu-index">01 · PSIKOLOGI &amp; MAKNA</div>
+          <h3>Ketenangan, Kepercayaan &amp; Profesionalisme</h3>
+          <div class="edu-value">VALUE — Stabilitas Emosional &amp; Otoritas Visual</div>
+          <p class="edu-body">Menurunkan detak jantung dan memicu rasa aman, damai, serta keteraturan. Inilah alasan institusi keuangan, perbankan, keamanan siber, dan raksasa teknologi mengandalkan warna biru sebagai simbol integritas, keandalan, dan kecerdasan.</p>
+          <div class="edu-tags"><span>Ketenangan</span><span>Kepercayaan</span><span>Profesionalisme</span><span>Keamanan</span></div>
+        </div>
+      </article>
+      <article class="edu-card" data-topic="sejarah">
+        <div class="edu-inner">
+          <div class="edu-index">02 · SEJARAH &amp; BUDAYA</div>
+          <h3>Lapis Lazuli &amp; Kemewahan Pigmen Kuno</h3>
+          <div class="edu-value">VALUE — Dari Tambang Sar-i Sang hingga Ultramarine</div>
+          <p class="edu-body">Selama ribuan tahun, biru adalah pigmen paling langka. Batu metamorf <i>Lapis Lazuli</i> ditambang di pegunungan Afghanistan sejak 6.000 tahun lalu, diekspor ke Mesir (menghasilkan <i>Egyptian Blue</i>) dan Eropa menjadi <i>Ultramarine</i> ("di seberang lautan") yang harganya melebihi emas murni di era Renaissance. Dalam berbagai budaya, biru melambangkan keabadian surga, perlindungan spiritual, dan kebangsawanan (<i>darah biru</i>).</p>
+          <div class="edu-tags"><span>Lapis Lazuli</span><span>Ultramarine</span><span>Egyptian Blue</span><span>Warisan Budaya</span></div>
+        </div>
+      </article>
+      <article class="edu-card" data-topic="sains">
+        <div class="edu-inner">
+          <div class="edu-index">03 · SAINS &amp; ALAM</div>
+          <h3>Hamburan Rayleigh &amp; Kelangkaan Biologis</h3>
+          <div class="edu-value">VALUE — Mengapa Langit &amp; Laut Biru, Namun Flora/Fauna Langka</div>
+          <p class="edu-body">Atmosfer bumi menghamburkan gelombang pendek cahaya matahari (biru ~460nm) ke segala arah melalui <b>Hamburan Rayleigh</b>, membuat langit tampak biru. Air laut menyerap spektrum merah &amp; kuning lebih cepat sehingga memantulkan biru. Sebaliknya, di dunia biologi, hampir tidak ada hewan vertebrata atau tumbuhan yang memiliki pigmen biru sejati: kupu-kupu <i>Morpho</i> dan burung <i>Blue Jay</i> tampak biru karena <b>struktur nano mikroskopis</b> yang membelokkan cahaya (<i>structural coloration</i>).</p>
+          <div class="edu-tags"><span>Rayleigh Scattering</span><span>Absorpsi Spektrum</span><span>Warna Struktural</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 KATALOG ================= -->
+<section class="section s-katalog" id="katalog">
+  <div class="section-label reveal">[ 02 — Katalog &amp; Kode Warna Teknis ]</div>
+  <h2 class="h2 h2-sm reveal" style="--rd:.1s">Gradasi &amp; Data Digital.</h2>
+  <p class="sub reveal" style="--rd:.15s">Klik tombol format (HEX, RGB, atau CMYK) untuk menyalin kode langsung ke clipboard Anda, atau klik tombol "Terapkan ke 3D" untuk mengubah warna bola WebGL di latar belakang.</p>
+  <div class="catalog-grid reveal" style="--rd:.22s" id="catalogGrid"></div>
+</section>
+
+<!-- ================= 04 PALET ================= -->
+<section class="section s-palet" id="palet">
+  <div class="section-label reveal">[ 03 — Inspirasi Palet &amp; Kombinasi ]</div>
+  <h2 class="h2 h2-sm reveal" style="--rd:.1s">Harmoni &amp; Kontras Spektrum.</h2>
+  <div class="palet-grid">
+    <div class="pl-left">
+      <article class="glass-card reveal" style="--rd:.15s">
+        <div class="glass-inner">
+          <h3 class="g-title">Kombinasi Kontras</h3>
+          <div class="g-sub">Komplementer: Biru + Oranye</div>
+          <p class="g-body">Berseberangan <b>180°</b> pada roda warna. Biru dingin berpadu dengan Oranye hangat menciptakan daya tarik visual maksimal untuk tombol <i>Call-to-Action</i> (CTA), poster olahraga, dan branding dinamis.</p>
+          <div class="chips">
+            <button class="chip" data-hex="#0E2AC5" style="--c:#0E2AC5"><i></i>#0E2AC5</button>
+            <button class="chip" data-hex="#2F69FF" style="--c:#2F69FF"><i></i>#2F69FF</button>
+            <button class="chip" data-hex="#FF6B00" style="--c:#FF6B00"><i></i>#FF6B00</button>
+            <button class="chip" data-hex="#FFA94D" style="--c:#FFA94D"><i></i>#FFA94D</button>
+            <button class="chip" data-hex="#94A3B8" style="--c:#94A3B8"><i></i>#94A3B8</button>
+          </div>
+          <div class="prop-bar">
+            <div class="pb-seg" style="flex:7;background:linear-gradient(90deg,#0E2AC5 0%,#2F69FF 100%)"></div>
+            <div class="pb-seg" style="flex:2;background:#94A3B8"></div>
+            <div class="pb-seg" style="flex:1;background:linear-gradient(90deg,#FF6B00 0%,#FFA94D 100%)"></div>
+          </div>
+          <div class="prop-legend"><span>70% Biru Dominan</span><span>20% Slate Netral</span><span>10% Oranye Aksen</span></div>
+        </div>
+      </article>
+      <article class="glass-card reveal" style="--rd:.25s">
+        <div class="glass-inner">
+          <h3 class="g-title">Kombinasi Harmonis</h3>
+          <div class="g-sub">Analogous: Biru + Ungu + Hijau</div>
+          <p class="g-body">Berdampingan pada roda warna. Perpaduan Biru, Ungu Indigo, dan Hijau Teal menghasilkan gradasi alami yang <b>lembut di mata dan menenangkan</b> — sempurna untuk produk wellness, fintech ramah, dan antarmuka tenang.</p>
+          <div class="chips">
+            <button class="chip" data-hex="#0D9488" style="--c:#0D9488"><i></i>#0D9488</button>
+            <button class="chip" data-hex="#06B6D4" style="--c:#06B6D4"><i></i>#06B6D4</button>
+            <button class="chip" data-hex="#2F69FF" style="--c:#2F69FF"><i></i>#2F69FF</button>
+            <button class="chip" data-hex="#6366F1" style="--c:#6366F1"><i></i>#6366F1</button>
+          </div>
+          <div class="grad-bar" style="background:linear-gradient(90deg,#0D9488 0%,#06B6D4 34%,#2F69FF 67%,#6366F1 100%)"></div>
+          <div class="prop-legend"><span>Hijau Teal</span><span>Cyan</span><span>Biru</span><span>Ungu Indigo</span></div>
+        </div>
+      </article>
+    </div>
+    <div class="pl-right reveal" style="--rd:.2s">
+      <div class="glass-card">
+        <div class="glass-inner">
+          <div class="tabs" id="paletteTabs">
+            <button class="tab-btn active" data-pane="pt-grafis">Desain Grafis</button>
+            <button class="tab-btn" data-pane="pt-interior">Interior Rumah</button>
+            <button class="tab-btn" data-pane="pt-fashion">Fashion</button>
+          </div>
+          <div class="pane active" id="pt-grafis" style="margin-top:18px">
+            <h3 class="g-title">Desain Grafis &amp; UI Digital</h3>
+            <div class="g-sub">"Fintech &amp; SaaS Trust"</div>
+            <div class="chips">
+              <button class="chip" data-hex="#0A192F" style="--c:#0A192F"><i></i>#0A192F</button>
+              <button class="chip" data-hex="#0E2AC5" style="--c:#0E2AC5"><i></i>#0E2AC5</button>
+              <button class="chip" data-hex="#2F69FF" style="--c:#2F69FF"><i></i>#2F69FF</button>
+              <button class="chip" data-hex="#E2E8F0" style="--c:#E2E8F0"><i></i>#E2E8F0</button>
+              <button class="chip" data-hex="#FF6B00" style="--c:#FF6B00"><i></i>#FF6B00</button>
+            </div>
+            <div class="rule-wrap">
+              <div class="rule-bar"><i style="flex:60;background:#0A192F"></i><i style="flex:30;background:#E2E8F0"></i><i style="flex:10;background:linear-gradient(90deg,#0E2AC5 0%,#FF6B00 100%)"></i></div>
+              <div class="prop-legend"><span>60% Deep Background</span><span>30% Surface</span><span>10% Brand + CTA</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mc-head"><span>Analitik Mingguan</span><span class="mc-badge"><i></i>LIVE</span></div>
+              <div class="mc-big">Rp 4,2M</div>
+              <div class="mc-sub">Pertumbuhan arus kas +12,4% (7 hari)</div>
+              <div class="mc-bars"><i style="height:34%"></i><i style="height:48%"></i><i style="height:40%"></i><i style="height:66%;background:#2F69FF"></i><i style="height:58%;background:#2F69FF"></i><i style="height:78%;background:#2F69FF"></i><i style="height:100%;background:#FF6B00"></i></div>
+              <button class="mc-cta" type="button">Tingkatkan Paket</button>
+            </div>
+          </div>
+          <div class="pane" id="pt-interior" style="margin-top:18px">
+            <h3 class="g-title">Interior Rumah</h3>
+            <div class="g-sub">"Nordic Coastal Sanctuary"</div>
+            <div class="chips">
+              <button class="chip" data-hex="#F8FAFC" style="--c:#F8FAFC"><i></i>#F8FAFC</button>
+              <button class="chip" data-hex="#6482AD" style="--c:#6482AD"><i></i>#6482AD</button>
+              <button class="chip" data-hex="#1E3A5F" style="--c:#1E3A5F"><i></i>#1E3A5F</button>
+              <button class="chip" data-hex="#D4A373" style="--c:#D4A373"><i></i>#D4A373</button>
+            </div>
+            <div class="room-mini">
+              <div class="tile" style="background:#F8FAFC">Warm Alabaster · 60%</div>
+              <div class="tile" style="background:#6482AD;color:#fff">Dusty Slate · 30%</div>
+              <div class="tile" style="background:#1E3A5F;color:#fff">Navy Velvet · 10%</div>
+            </div>
+            <ul class="ul-check">
+              <li>Gunakan lampu hangat <b>2.700K</b> agar dinding alabaster tetap lembut; cahaya pagi memperkuat karakter Dusty Slate Blue pada dinding aksen.</li>
+              <li>Psikologi ruang: kamar tidur &amp; ruang kerja bernuansa biru slate menurunkan detak jantung, memperlambat napas, dan mempercepat relaksasi.</li>
+              <li>Bantal velvet <b>#1E3A5F</b> menambah kedalaman yang tenang; lantai kayu oak hangat <b>#D4A373</b> menyeimbangkan dinginnya biru dengan kehangatan alami.</li>
+            </ul>
+          </div>
+          <div class="pane" id="pt-fashion" style="margin-top:18px">
+            <h3 class="g-title">Fashion &amp; Sartorial</h3>
+            <div class="g-sub">"Timeless Monochrome &amp; Camel"</div>
+            <div class="chips">
+              <button class="chip" data-hex="#191970" style="--c:#191970"><i></i>#191970</button>
+              <button class="chip" data-hex="#87CEEB" style="--c:#87CEEB"><i></i>#87CEEB</button>
+              <button class="chip" data-hex="#C19A6B" style="--c:#C19A6B"><i></i>#C19A6B</button>
+              <button class="chip" data-hex="#FFFFFF" style="--c:#FFFFFF"><i></i>#FFFFFF</button>
+            </div>
+            <div class="f-stack">
+              <div class="f-row"><i style="background:#191970"></i><span class="n">Midnight Blazer</span><span class="t">Wool · Struktur</span></div>
+              <div class="f-row"><i style="background:#87CEEB"></i><span class="n">Oxford Sky Shirt</span><span class="t">Linen · Ringan</span></div>
+              <div class="f-row"><i style="background:#C19A6B"></i><span class="n">Camel Trench / Chinos</span><span class="t">Cotton Twill · Hangat</span></div>
+              <div class="f-row"><i style="background:#FFFFFF"></i><span class="n">Crisp Pocket Square</span><span class="t">Poplin · Crisp</span></div>
+            </div>
+            <ul class="ul-check">
+              <li>Percaturan tekstur: wol blazer (matte, padat) melawan linen oxford (berpori, ringan) — kontras <b>tekstur</b> membuat monokrom tidak datar.</li>
+              <li>Camel adalah netral hangat paling aman untuk dipadukan dengan biru; putih crisp di dekat wajah mempercerahkan warna kulit.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 LAB ================= -->
+<section class="section s-lab" id="lab">
+  <div class="section-label reveal">[ 04 — Fitur Interaktif ]</div>
+  <h2 class="h2 h2-sm reveal" style="--rd:.1s">Eksperimen Spektrum Langsung.</h2>
+
+  <div class="lab-grid">
+    <div class="lab-left reveal" style="--rd:.15s">
+      <div class="glass-card" style="height:100%">
+        <div class="glass-inner pe">
+          <div class="panel-head">
+            <h3>Interactive Blue Color Picker</h3>
+            <p>Sliders Kepekatan &amp; Spektrum</p>
+          </div>
+          <div class="sld">
+            <div class="sld-lab"><span class="sld-name">Spektrum Biru (Hue)</span><span class="sld-val" id="valHue">223°</span></div>
+            <input type="range" class="hslider" id="sliderHue" min="180" max="250" step="1" value="223">
+          </div>
+          <div class="sld">
+            <div class="sld-lab"><span class="sld-name">Kepekatan Warna (Saturation)</span><span class="sld-val" id="valSat">100%</span></div>
+            <input type="range" class="hslider" id="sliderSat" min="10" max="100" step="1" value="100">
+          </div>
+          <div class="sld">
+            <div class="sld-lab"><span class="sld-name">Kedalaman Cahaya (Lightness)</span><span class="sld-val" id="valLight">59%</span></div>
+            <input type="range" class="hslider" id="sliderLight" min="12" max="85" step="1" value="59">
+          </div>
+          <div class="presets" id="presetRow">
+            <button class="preset" data-h="197" data-s="71" data-l="73">Sky</button>
+            <button class="preset" data-h="180" data-s="100" data-l="50">Cyan</button>
+            <button class="preset" data-h="180" data-s="72" data-l="56">Turquoise</button>
+            <button class="preset" data-h="223" data-s="100" data-l="59">Royal</button>
+            <button class="preset" data-h="240" data-s="100" data-l="25">Navy</button>
+            <button class="preset" data-h="240" data-s="64" data-l="27">Midnight</button>
+          </div>
+          <div class="readout">
+            <div class="ro-swatch" id="roSwatch"></div>
+            <div class="ro-vals">
+              <div class="ro-item"><span>HEX</span><b id="roHex">#2F69FF</b></div>
+              <div class="ro-item"><span>RGB</span><b id="roRgb">rgb(47, 105, 255)</b></div>
+              <div class="ro-item"><span>CMYK</span><b id="roCmyk">cmyk(82%, 59%, 0%, 0%)</b></div>
+            </div>
+          </div>
+          <div class="picker-actions">
+            <button class="btn-blue" id="btnCopyHex">Salin HEX</button>
+            <div class="sync-row">
+              <button class="switch on" id="syncToggle" role="switch" aria-checked="true" aria-label="Sinkronkan dengan Bola 3D WebGL"></button>
+              <label for="syncToggle">Sinkronkan dengan Bola 3D WebGL</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab-right reveal" style="--rd:.22s">
+      <div class="glass-card" style="height:100%">
+        <div class="glass-inner pe" id="mockRoot">
+          <div class="panel-head">
+            <h3>Live Mockup Simulator</h3>
+            <p>3 Mode Preview · Terhubung ke Picker</p>
+          </div>
+          <div class="mock-tabs" style="margin-top:14px" id="mockTabs">
+            <button class="mock-tab active" data-mode="room">1. Dinding Ruangan</button>
+            <button class="mock-tab" data-mode="fashion">2. Fashion &amp; Pakaian</button>
+            <button class="mock-tab" data-mode="webui">3. Layout Web UI</button>
+          </div>
+          <div class="mock-stage-wrap">
+            <!-- MODE 1: ROOM -->
+            <div class="mock-stage active" data-stage="room">
+              <svg class="room-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+                <defs>
+                  <linearGradient id="wallShade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+                    <stop offset="1" stop-color="#0a0a2a" stop-opacity=".14"/>
+                  </linearGradient>
+                  <linearGradient id="floorG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#d8b48e"/><stop offset="1" stop-color="#b98d63"/>
+                  </linearGradient>
+                  <radialGradient id="sofaShade" cx=".5" cy=".5" r=".5">
+                    <stop offset="0" stop-color="#0a0a2a" stop-opacity=".22"/><stop offset="1" stop-color="#0a0a2a" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <rect x="0" y="0" width="400" height="215" style="fill:var(--m-acc,#2F69FF);transition:fill .3s"/>
+                <rect x="0" y="0" width="400" height="215" fill="url(#wallShade)"/>
+                <rect x="52" y="44" width="60" height="78" rx="4" fill="#ffffff" opacity=".92"/>
+                <rect x="60" y="52" width="44" height="62" style="fill:var(--m-acc-light,#dbeafe);transition:fill .3s"/>
+                <rect x="126" y="52" width="42" height="56" rx="3" fill="#ffffff" opacity=".8"/>
+                <rect x="133" y="59" width="28" height="42" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                <circle cx="308" cy="52" r="20" fill="#fff" opacity=".9"/>
+                <line x1="308" y1="52" x2="308" y2="40" stroke="#0a0a2a" stroke-width="2.4" stroke-linecap="round"/>
+                <line x1="308" y1="52" x2="317" y2="58" stroke="#0a0a2a" stroke-width="2" stroke-linecap="round"/>
+                <ellipse cx="196" cy="258" rx="128" ry="18" fill="url(#sofaShade)" style="transition:opacity .3s"/>
+                <rect x="0" y="215" width="400" height="85" fill="url(#floorG)"/>
+                <g stroke="#00000022" stroke-width="1"><line x1="0" y1="240" x2="400" y2="240"/><line x1="0" y1="265" x2="400" y2="265"/><line x1="90" y1="215" x2="60" y2="300"/><line x1="230" y1="215" x2="240" y2="300"/><line x1="330" y1="215" x2="360" y2="300"/></g>
+                <!-- sofa -->
+                <g>
+                  <rect x="150" y="150" width="160" height="52" rx="16" fill="#ffffff"/>
+                  <rect x="140" y="158" width="24" height="66" rx="10" fill="#f2f4f8"/>
+                  <rect x="296" y="158" width="24" height="66" rx="10" fill="#f2f4f8"/>
+                  <rect x="158" y="150" width="70" height="34" rx="10" style="fill:var(--m-acc-light,#dbeafe);transition:fill .3s"/>
+                  <rect x="232" y="150" width="70" height="34" rx="10" fill="#f2f4f8"/>
+                  <rect x="168" y="164" width="50" height="20" rx="8" style="fill:var(--m-acc,#2F69FF);opacity:.85;transition:fill .3s"/>
+                  <rect x="242" y="164" width="50" height="20" rx="8" style="fill:var(--m-acc-deep,#0A33BF);opacity:.85;transition:fill .3s"/>
+                  <rect x="150" y="198" width="160" height="26" rx="8" fill="#f7f9fb"/>
+                  <rect x="158" y="226" width="10" height="14" rx="3" fill="#8a6a4a"/>
+                  <rect x="292" y="226" width="10" height="14" rx="3" fill="#8a6a4a"/>
+                </g>
+                <!-- side table + vase -->
+                <g>
+                  <rect x="74" y="196" width="58" height="6" rx="3" fill="#9a774f"/>
+                  <rect x="80" y="202" width="6" height="26" fill="#8a6a44"/>
+                  <rect x="120" y="202" width="6" height="26" fill="#8a6a44"/>
+                  <rect x="92" y="168" width="22" height="30" rx="8" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                  <path d="M103 168 C100 152 96 148 88 142" stroke="#3f7d4e" stroke-width="2" fill="none"/>
+                  <path d="M103 168 C106 150 112 146 120 140" stroke="#3f7d4e" stroke-width="2" fill="none"/>
+                  <ellipse cx="86" cy="140" rx="5" ry="8" fill="#57945f" transform="rotate(-28 86 140)"/>
+                  <ellipse cx="120" cy="138" rx="5" ry="8" fill="#57945f" transform="rotate(24 120 138)"/>
+                </g>
+                <!-- plant right -->
+                <g>
+                  <path d="M354 186 C354 176 350 170 344 164" stroke="#3f7d4e" stroke-width="2.4" fill="none"/>
+                  <path d="M356 186 C358 174 364 168 370 162" stroke="#3f7d4e" stroke-width="2.4" fill="none"/>
+                  <ellipse cx="342" cy="160" rx="6" ry="11" fill="#57945f" transform="rotate(-24 342 160)"/>
+                  <ellipse cx="372" cy="158" rx="6" ry="11" fill="#4d8a56" transform="rotate(26 372 158)"/>
+                  <path d="M344 186 h24 l-4 34 h-16 z" fill="#c98d54"/>
+                </g>
+              </svg>
+            </div>
+            <!-- MODE 2: FASHION -->
+            <div class="mock-stage" data-stage="fashion">
+              <div class="fashion-wrap">
+                <svg viewBox="0 0 320 360" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="fabG" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+                      <stop offset=".45" stop-color="#ffffff" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="160" cy="180" r="140" style="fill:var(--m-acc-light,#dbeafe);opacity:.55;transition:fill .3s"/>
+                  <path d="M118 60 L160 84 L202 60" stroke="#94a3b8" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <line x1="160" y1="52" x2="160" y2="34" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                  <!-- hood -->
+                  <path d="M118 60 C118 38 202 38 202 60 C204 74 196 84 196 84 L124 84 C124 84 116 74 118 60 Z" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                  <!-- body -->
+                  <path d="M112 82 C126 96 194 96 208 82 L268 108 C282 114 286 128 280 140 L246 196 L238 306 C238 318 82 318 82 306 L74 196 L40 140 C34 128 38 114 52 108 Z" style="fill:var(--m-acc,#2F69FF);transition:fill .3s"/>
+                  <path d="M112 82 C126 96 194 96 208 82 L200 104 C180 116 140 116 120 104 Z" style="fill:var(--m-acc-deep,#0A33BF);opacity:.55;transition:fill .3s"/>
+                  <!-- kangaroo pocket -->
+                  <path d="M100 236 L220 236 L214 296 L106 296 Z" style="fill:var(--m-acc-deep,#0A33BF);opacity:.35;transition:fill .3s"/>
+                  <path d="M100 236 L220 236" stroke="#ffffff" stroke-width="2" opacity=".4"/>
+                  <!-- seams -->
+                  <path d="M74 196 L84 300 M246 196 L236 300" stroke="#0a0a2a" stroke-width="1.6" stroke-dasharray="5 5" opacity=".35" fill="none"/>
+                  <path d="M40 140 C38 148 42 156 46 160 M280 140 C282 148 278 156 274 160" stroke="#ffffff" stroke-width="2" opacity=".45" fill="none"/>
+                  <!-- fabric highlight -->
+                  <path d="M112 82 L68 112 L44 142 L74 196 L92 192 L70 150 C90 122 104 106 112 82 Z" fill="url(#fabG)"/>
+                  <!-- cuffs & hem -->
+                  <path d="M238 306 C238 318 82 318 82 306 L82 296 C120 308 200 308 238 296 Z" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                  <rect x="62" y="182" width="26" height="16" rx="6" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                  <rect x="232" y="182" width="26" height="16" rx="6" style="fill:var(--m-acc-deep,#0A33BF);transition:fill .3s"/>
+                  <!-- chest label -->
+                  <text x="160" y="132" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="3" fill="#ffffff" opacity=".65">BIRU·STUDIO</text>
+                  <circle cx="160" cy="146" r="7" fill="#ffffff" opacity=".8"/>
+                </svg>
+              </div>
+            </div>
+            <!-- MODE 3: WEB UI -->
+            <div class="mock-stage" data-stage="webui">
+              <div class="ui-win">
+                <div class="ui-topbar"><i></i><i></i><i></i></div>
+                <div class="ui-hero">
+                  <div class="k">Dashboard · Live</div>
+                  <div class="big" >Spektrum Pertumbuhan Klien</div>
+                  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+                    <button class="ui-btn solid" type="button">Mulai Sekarang</button>
+                    <button class="ui-btn" type="button">Lihat Demo</button>
+                  </div>
+                </div>
+                <div class="ui-row">
+                  <div class="ui-card">
+                    <div class="ui-k">Retensi Pengguna</div>
+                    <div class="ui-kpi">92,4% <span class="ui-delta">▲ 3,1%</span></div>
+                    <div class="rings">
+                      <div class="ring">
+                        <svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="27" fill="none" stroke="#eef1f6" stroke-width="7"/><circle cx="33" cy="33" r="27" fill="none" style="stroke:var(--m-acc,#2F69FF);transition:stroke .3s" stroke-width="7" stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="12.8"/></svg>
+                        <b>92%</b>
+                      </div>
+                      <div class="ring">
+                        <svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="27" fill="none" stroke="#eef1f6" stroke-width="7"/><circle cx="33" cy="33" r="27" fill="none" style="stroke:var(--m-acc-deep,#0A33BF);transition:stroke .3s" stroke-width="7" stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="59.4"/></svg>
+                        <b>65%</b>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ui-card">
+                    <div class="ui-k">Aktivitas Mingguan</div>
+                    <div class="ui-kpi">18,2K</div>
+                    <div class="ui-bars"><i style="height:40%"></i><i style="height:62%" class="hot"></i><i style="height:48%"></i><i style="height:78%" class="hot"></i><i style="height:56%"></i><i style="height:92%" class="hot"></i><i style="height:70%"></i></div>
+                  </div>
+                </div>
+                <div class="ui-badges">
+                  <span class="ui-badge">Realtime</span>
+                  <span class="ui-badge">Trust Score A+</span>
+                  <span class="ui-badge">Latency 40ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="glass-card quiz-card reveal" style="--rd:.25s">
+    <div class="glass-inner pe">
+      <div class="panel-head">
+        <h3>Laboratorium Kuis Interaktif</h3>
+        <p>Dua Mode · Kepribadian &amp; Kepekaan Spektrum</p>
+      </div>
+      <div class="quiz-tabs" style="margin-top:16px">
+        <button class="q-tab active" data-quiz="a">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Mode A — Kepribadian
+        </button>
+        <button class="q-tab" data-quiz="b">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          Mode B — Tes Kepekaan
+        </button>
+      </div>
+
+      <div class="quiz-pane active" id="quizA">
+        <div id="quizAPlay">
+          <div class="q-progress" id="qaProgress">PERTANYAAN 1 / 4</div>
+          <div class="q-text" id="qaText"></div>
+          <div class="q-opts" id="qaOpts"></div>
+        </div>
+        <div id="quizAResult" style="display:none">
+          <div class="q-progress">HASIL — VARIAN BIRU ANDA</div>
+          <div class="badge-row" style="margin-top:14px">
+            <div class="badge-swatch" id="qaSwatch"></div>
+            <div>
+              <div class="result-h" id="qaName"></div>
+              <div class="result-hex" id="qaHex"></div>
+            </div>
+          </div>
+          <p class="result-desc" id="qaDesc"></p>
+          <div class="q-actions">
+            <button class="btn-blue" id="qaApply">Terapkan Warna Kepribadian ke 3D</button>
+            <button class="btn-ghost" id="qaRestart">Ulangi Kuis</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-pane" id="quizB">
+        <div id="quizBPlay">
+          <div class="spec-status">
+            <span>LEVEL <b id="qbLevel">1</b>/5</span>
+            <span>SKOR AKURASI <b id="qbScore">0</b>/5</span>
+            <span>GARI ΔL <b id="qbDelta">ΔL 12%</b></span>
+          </div>
+          <div class="q-text" style="font-size:16px;margin-top:8px">Cari 1 kotak yang berbeda kecerahannya — klik!</div>
+          <div class="spec-grid" id="qbGrid"></div>
+          <div class="spec-feedback" id="qbFeedback">Level 1 · Grid 3×3 · Perbedaan kecerahan 12%</div>
+        </div>
+        <div id="quizBResult" style="display:none">
+          <div class="q-progress">PERINGKAT MATA SPEKTRUM</div>
+          <div class="badge-row" style="margin-top:14px">
+            <div class="badge-swatch" id="qbSwatch"></div>
+            <div>
+              <div class="result-h" id="qbName"></div>
+              <div class="result-hex" id="qbScoreLine"></div>
+            </div>
+          </div>
+          <p class="result-desc" id="qbDesc"></p>
+          <div class="q-actions">
+            <button class="btn-ghost" id="qbRestart">Ulangi Tes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer id="siteFooter">
+  <div class="bloom bloom-tr"></div>
+  <div class="bloom bloom-bl"></div>
+  <div class="marquee" aria-hidden="true">
+    <div class="mq-track" id="mqTrack"></div>
+  </div>
+  <div class="f-body">
+    <div class="f-cta reveal">
+      <div class="f-label">[ Eksplorasi Tanpa Batas ]</div>
+      <h3 class="f-h">Ciptakan desain<br>dengan kedalaman biru.</h3>
+      <a class="f-btn" href="#katalog"><span>Jelajahi Katalog HEX</span><span class="f-orb"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></a>
+    </div>
+    <div class="f-links reveal" style="--rd:.12s">
+      <div class="f-cols">
+        <div class="f-col">
+          <h4>Edukasi</h4>
+          <a href="#edukasi">Psikologi Biru</a>
+          <a href="#edukasi">Sejarah Lapis Lazuli</a>
+          <a href="#edukasi">Hamburan Rayleigh</a>
+          <a href="#edukasi">Warna Struktural</a>
+        </div>
+        <div class="f-col">
+          <h4>Varian Teknis</h4>
+          <a href="#katalog">Sky Blue</a>
+          <a href="#katalog">Cyan &amp; Turquoise</a>
+          <a href="#katalog">Royal Blue</a>
+          <a href="#katalog">Navy &amp; Midnight</a>
+        </div>
+        <div class="f-col">
+          <h4>Laboratorium</h4>
+          <a href="#lab">Color Picker HSL</a>
+          <a href="#lab">Simulator Mockup</a>
+          <a href="#lab">Kuis Kepribadian</a>
+          <a href="#lab">Tes Kepekaan Mata</a>
+        </div>
+      </div>
+    </div>
+    <div class="f-bottom" style="grid-column:1/-1">
+      <div class="f-id">
+        <span class="wm">BIRU.</span>
+        <span class="dot"></span>
+        <small>© 2026 Studio Spektrum — Ensiklopedia Interaktif Warna Biru.</small>
+      </div>
+      <div class="f-social">
+        <button aria-label="Instagram"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></button>
+        <button aria-label="Dribbble"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94"/><path d="M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32"/><path d="M8.56 2.75c4.37 6 6 9.42 8 17.72"/></svg></button>
+        <button aria-label="Twitter"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= STUDIO DRAWER ================= -->
+<div id="drawerScrim"></div>
+<aside id="drawer" data-lenis-prevent>
+  <div class="drawer-head">
+    <div class="drawer-title">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+      Studio Spektrum
+    </div>
+    <button class="drawer-close" id="drawerClose" aria-label="Tutup">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
+  <p class="drawer-note">Pilih palet bola 3D utama. Saat Anda menggulir halaman, bola-bola akan bereaksi terhadap gravitasi, membentuk siluet hati, dan merespons kursor.</p>
+  <div class="drawer-caption">Shader Spektrum Biru</div>
+  <div id="themeCards"></div>
+  <div class="drawer-foot">
+    <div class="mono-row">RENDER ENGINE / THREE.JS WEBGL</div>
+    <div class="mono-row">DYNAMICS SOLVER / 3D COLLISION VERLET</div>
+    <button class="btn-reset" id="btnResetTheme">Reset Defaults</button>
+  </div>
+</aside>
+
+<div id="toasts"></div>
+
+<!-- ================= LOADER ================= -->
+<div id="loader">
+  <div class="loader-col">
+    <div class="loader-status" id="loaderStatus">Mengkalibrasi spektrum biru</div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+    <div class="loader-count" id="loaderCount">000%</div>
+  </div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+
+/* =========================================================
+   GLOBALS & SHARED STATE
+========================================================= */
+const control = { started: false, progress: 0 };
+const mousePos = { x: 99, y: 99, isDown: false };
+
+window.addEventListener('pointermove', e => {
+  mousePos.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mousePos.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+window.addEventListener('mousedown', () => mousePos.isDown = true);
+window.addEventListener('mouseup',   () => mousePos.isDown = false);
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+
+/* =========================================================
+   SMOOTH SCROLL (LENIS-STYLE, VANILLA)
+========================================================= */
+let currentScroll = window.scrollY;
+let targetScroll = window.scrollY;
+let lastWrite = 0;
+history.scrollRestoration = 'manual';
+
+const isScrollableUnder = (el) => {
+  while (el && el !== document.documentElement && el !== document.body) {
+    if (el.nodeType === 1) {
+      const st = getComputedStyle(el);
+      if ((st.overflowY === 'auto' || st.overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+    }
+    el = el.parentElement;
+  }
+  return false;
+};
+
+window.addEventListener('wheel', (e) => {
+  if (isScrollableUnder(e.target)) return;
+  e.preventDefault();
+  const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
+  targetScroll = clamp(targetScroll + delta * 1, 0, maxScroll());
+}, { passive: false });
+
+window.addEventListener('scroll', () => {
+  if (performance.now() - lastWrite < 120) return;
+  currentScroll = window.scrollY;
+  targetScroll = window.scrollY;
+});
+
+function scrollRaf() {
+  targetScroll = clamp(targetScroll, 0, maxScroll());
+  const dy = targetScroll - currentScroll;
+  if (Math.abs(dy) > 0.05) {
+    currentScroll += dy * 0.09;
+    if (Math.abs(targetScroll - currentScroll) < 0.05) currentScroll = targetScroll;
+    lastWrite = performance.now();
+    window.scrollTo(0, currentScroll);
+  } else if (window.scrollY !== currentScroll) {
+    currentScroll = window.scrollY;
+  }
+  syncControl();
+  requestAnimationFrame(scrollRaf);
+}
+
+/* Anchor links: smooth jump via lerp target */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    const href = a.getAttribute('href');
+    const el = href.length > 1 ? document.querySelector(href) : null;
+    e.preventDefault();
+    if (el) {
+      const y = clamp(el.getBoundingClientRect().top + window.scrollY - 0, 0, maxScroll());
+      targetScroll = y;
+      history.replaceState(null, '', href);
+    } else {
+      targetScroll = 0;
+    }
+  });
+});
+
+/* =========================================================
+   SCROLL → PHYSICS PROGRESS + BACKGROUND STAGE
+========================================================= */
+const bgEl = document.getElementById('bg');
+const GRADIENTS = [
+  'radial-gradient(circle at center, #ffffff 0%, #ecefff 35%, #c2d1ff 100%)',
+  'radial-gradient(circle at center, #ffffff 0%, #f0fdfa 38%, #ccfbf1 100%)',
+  'radial-gradient(circle at center, #ffffff 0%, #eff6ff 38%, #dbeafe 100%)'
+];
+let curStage = -1;
+
+function syncControl() {
+  maxScroll();
+  const progress = (window.scrollY / maxScroll()) * 3.5;
+  control.progress = progress;
+  const stage = progress > 1.55 ? 2 : progress > 0.7 ? 1 : 0;
+  if (stage !== curStage) { curStage = stage; bgEl.className = 'stage-' + stage; }
+}
+
+/* =========================================================
+   ICONS / TOAST / CLIPBOARD
+========================================================= */
+const ICONS = {
+  copy: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  check: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  rotate: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+  arrow3d: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>'
+};
+
+const toastHost = document.getElementById('toasts');
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = ICONS.check + '<span>' + msg + '</span>';
+  toastHost.appendChild(t);
+  setTimeout(() => t.classList.add('out'), 2200);
+  setTimeout(() => t.remove(), 2600);
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+  }
+}
+
+/* =========================================================
+   REVEAL SYSTEM (SECTIONS 02–05 & FOOTER)
+========================================================= */
+function initReveals() {
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  els.forEach(el => io.observe(el));
+}
+
+/* =========================================================
+   CATALOG (SECTION 02—3D KATALOG)
+========================================================= */
+const CATALOG = [
+  { name: 'Sky Blue',      char: 'Cerah, lapang, menyerupai langit siang tanpa awan',           hex: '#87CEEB', rgb: 'rgb(135, 206, 235)',  cmyk: 'cmyk(43%, 12%, 0%, 8%)' },
+  { name: 'Cyan',          char: 'Spektrum biru-hijau elektrik primer subtraktif',              hex: '#00FFFF', rgb: 'rgb(0, 255, 255)',    cmyk: 'cmyk(100%, 0%, 0%, 0%)' },
+  { name: 'Turquoise',     char: 'Permata tropis yang memadukan ketenangan & kesegaran',        hex: '#40E0D0', rgb: 'rgb(64, 224, 208)',   cmyk: 'cmyk(71%, 0%, 7%, 12%)' },
+  { name: 'Royal Blue',    char: 'Biru kobalt vibran yang berwibawa dan modern',                hex: '#2F69FF', rgb: 'rgb(47, 105, 255)',   cmyk: 'cmyk(82%, 59%, 0%, 0%)' },
+  { name: 'Navy',          char: 'Biru samudra klasik yang tegas, formal, dan korporat',        hex: '#000080', rgb: 'rgb(0, 0, 128)',      cmyk: 'cmyk(100%, 100%, 0%, 50%)' },
+  { name: 'Midnight Blue', char: 'Kedalaman langit malam yang misterius dan elegan',            hex: '#191970', rgb: 'rgb(25, 25, 112)',    cmyk: 'cmyk(78%, 78%, 0%, 56%)' }
+];
+
+function renderCatalog() {
+  const grid = document.getElementById('catalogGrid');
+  grid.innerHTML = CATALOG.map(c => `
+    <article class="kc" data-hex="${c.hex}">
+      <div class="kc-inner">
+        <div class="kc-banner" style="background:${c.hex}">
+          <button class="kc-apply" data-apply="${c.hex}">Terapkan ke 3D</button>
+        </div>
+        <h3>${c.name}</h3>
+        <p class="char">${c.char}</p>
+        <div class="code-rows">
+          <button class="code-row" data-fmt="HEX"  data-val="${c.hex}"><span class="fmt">HEX</span><span class="val">${c.hex}</span>${ICONS.copy}</button>
+          <button class="code-row" data-fmt="RGB"  data-val="${c.rgb}"><span class="fmt">RGB</span><span class="val">${c.rgb}</span>${ICONS.copy}</button>
+          <button class="code-row" data-fmt="CMYK" data-val="${c.cmyk}"><span class="fmt">CMYK</span><span class="val">${c.cmyk}</span>${ICONS.copy}</button>
+        </div>
+      </div>
+    </article>`).join('');
+
+  grid.querySelectorAll('.code-row').forEach(row => {
+    row.addEventListener('click', async () => {
+      await copyText(row.dataset.val);
+      toast('Kode <b>' + row.dataset.fmt + '</b> disalin: <b>' + row.dataset.val + '</b>');
+      row.classList.add('ok');
+      setTimeout(() => row.classList.remove('ok'), 900);
+    });
+  });
+  grid.querySelectorAll('.kc-apply').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setHeroPalette(btn.dataset.apply);
+      btn.textContent = '✓ Diterapkan';
+      setTimeout(() => btn.textContent = 'Terapkan ke 3D', 1200);
+    });
+  });
+}
+
+/* Topic filter pills */
+function initTopicPills() {
+  const pills = document.querySelectorAll('#topicPills .pill');
+  const cards = document.querySelectorAll('.edu-card');
+  pills.forEach(p => p.addEventListener('click', () => {
+    pills.forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    const t = p.dataset.topic;
+    cards.forEach(c => {
+      const match = t === 'all';
+      c.classList.remove('match', 'dim');
+      if (!match) c.classList.add(t === c.dataset.topic ? 'match' : 'dim');
+    });
+  }));
+}
+
+/* Swatch chips copy */
+function initColorChips() {
+  document.querySelectorAll('.chip').forEach(ch => {
+    ch.addEventListener('click', async () => {
+      await copyText(ch.dataset.hex);
+      toast('HEX disalin: <b>' + ch.dataset.hex + '</b>');
+    });
+  });
+}
+
+/* Generic tab systems (palet panels / mock / quiz) */
+function bindTabs(containerSel, targetSel, activeCls) {
+  const box = document.querySelector(containerSel);
+  if (!box) return;
+  const targets = document.querySelectorAll(targetSel);
+  box.querySelectorAll('[data-pane],[data-mode],[data-quiz]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pane || btn.dataset.mode || btn.dataset.quiz;
+      box.querySelectorAll('button').forEach(b => b.classList.toggle(activeCls, b === btn));
+      let attr = key;
+      if (btn.dataset.quiz != null) attr = 'quiz' + key.toUpperCase();
+      targets.forEach(t => {
+        const id = t.dataset.pane || t.dataset.stage || t.id;
+        t.classList.toggle('active', id === attr);
+      });
+    });
+  });
+}
+
+/* =========================================================
+   STUDIO CONTROLS DRAWER
+========================================================= */
+const THEMES = [
+  { id: 'roseGold',   name: 'Royal Blue & Pearl',       desc: 'Bola kobalt hiper-realistis mengambang di atas gradasi putih-slate.', primary: '#2F69FF', ball: '#2F69FF' },
+  { id: 'arcticBlue', name: 'Arctic Sky & Crystal',     desc: 'Biru langit kristal dingin dengan kilau kaca transparan.',            primary: '#96E5FF', ball: '#96E5FF' },
+  { id: 'voltLime',   name: 'Cyan Volt & Turquoise',    desc: 'Spektrum biru-kehijauan tropis yang segar dan kontras.',              primary: '#40E0D0', ball: '#E1FC03' },
+  { id: 'pinkBlush',  name: 'Rose Blush & Crème',       desc: 'Aksen kontras hangat di dalam studio mutiara.',                        primary: '#FFA6B3', ball: '#FFC5C2' }
+];
+let currentThemeId = 'roseGold';
+
+function renderThemeCards() {
+  const host = document.getElementById('themeCards');
+  host.innerHTML = THEMES.map(t => `
+    <button class="theme-card ${t.id === currentThemeId ? 'selected' : ''}" data-theme="${t.id}">
+      <span class="th-sw" style="background:${t.primary}"></span>
+      <span><span class="nm">${t.name}</span><span class="ds" style="display:block">${t.desc}</span></span>
+    </button>`).join('');
+  host.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const t = THEMES.find(x => x.id === card.dataset.theme);
+      if (!t || t.id === currentThemeId) return;
+      currentThemeId = t.id;
+      renderThemeCards();
+      rebuildScene(t.ball);
+    });
+  });
+}
+
+const drawerEl = document.getElementById('drawer');
+const drawerScrim = document.getElementById('drawerScrim');
+function openDrawer() { drawerEl.classList.add('open'); drawerScrim.classList.add('open'); }
+function closeDrawer() { drawerEl.classList.remove('open'); drawerScrim.classList.remove('open'); }
+document.getElementById('btnDrawer').addEventListener('click', openDrawer);
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+drawerScrim.addEventListener('click', closeDrawer);
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.getElementById('btnResetTheme').addEventListener('click', () => {
+  const t = THEMES[0];
+  if (currentThemeId === t.id) return;
+  currentThemeId = t.id;
+  renderThemeCards();
+  rebuildScene(t.ball);
+});
+
+/* Footer marquee */
+function renderMarquee() {
+  const words = ['Ketenangan Pikiran', 'Lapis Lazuli', 'Hamburan Rayleigh', 'Spektrum 460nm'];
+  const half = words.map(w => `<span class="word">${w}</span><span class="mq-dot"></span>`).join('');
+  document.getElementById('mqTrack').innerHTML = half + half;
+}
+
+/* Header adapts when the dark footer slides beneath it */
+function initHeaderContrast() {
+  const header = document.getElementById('siteHeader');
+  const footer = document.getElementById('siteFooter');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      header.classList.toggle('on-dark', en.isIntersecting && en.intersectionRatio > 0.28);
+    }
+  }, { threshold: [0, 0.3, 0.6] });
+  io.observe(footer);
+}
+
+/* =========================================================
+   COLOR MATH
+========================================================= */
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+function hslToHex(h, s, l) { return rgbToHex(...hslToRgb(h, s, l)); }
+function rgbToCmyk(r, g, b) {
+  const R = r / 255, G = g / 255, B = b / 255;
+  const k = 1 - Math.max(R, G, B);
+  if (k >= 1) return [0, 0, 0, 100];
+  const c = (1 - R - k) / (1 - k), m = (1 - G - k) / (1 - k), y = (1 - B - k) / (1 - k);
+  return [Math.round(c * 100), Math.round(m * 100), Math.round(y * 100), Math.round(k * 100)];
+}
+
+/* =========================================================
+   INTERACTIVE COLOR PICKER + SCENE SYNC + MOCKS
+========================================================= */
+const sliderHue = document.getElementById('sliderHue');
+const sliderSat = document.getElementById('sliderSat');
+const sliderLight = document.getElementById('sliderLight');
+const syncToggle = document.getElementById('syncToggle');
+const mockRoot = document.getElementById('mockRoot');
+let pickerHex = '#2F69FF';
+
+function fillTrack(slider) {
+  const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+  slider.style.setProperty('--p', pct + '%');
+}
+
+function updatePicker(fireScene) {
+  const h = +sliderHue.value, s = +sliderSat.value, l = +sliderLight.value;
+  document.getElementById('valHue').textContent = h + '°';
+  document.getElementById('valSat').textContent = s + '%';
+  document.getElementById('valLight').textContent = l + '%';
+  fillTrack(sliderHue); fillTrack(sliderSat); fillTrack(sliderLight);
+
+  const rgb = hslToRgb(h, s, l);
+  pickerHex = rgbToHex(...rgb);
+  const [r, g, b] = rgb;
+  const cmyk = rgbToCmyk(r, g, b);
+
+  document.getElementById('roHex').textContent = pickerHex;
+  document.getElementById('roRgb').textContent = `rgb(${r}, ${g}, ${b})`;
+  document.getElementById('roCmyk').textContent = `cmyk(${cmyk[0]}%, ${cmyk[1]}%, ${cmyk[2]}%, ${cmyk[3]}%)`;
+  document.getElementById('roSwatch').style.background = pickerHex;
+
+  const accDark  = hslToHex(h, s, Math.max(8, l - 20));
+  const accDeep  = hslToHex(h, Math.min(100, s + 5), Math.max(5, l - 30));
+  const accLight = hslToHex(h, Math.max(15, Math.round(s * 0.8)), Math.min(92, l + 20));
+  const comp     = hslToHex((h + 180) % 360, s, l);
+  mockRoot.style.setProperty('--m-acc', pickerHex);
+  mockRoot.style.setProperty('--m-acc-dark', accDark);
+  mockRoot.style.setProperty('--m-acc-deep', accDeep);
+  mockRoot.style.setProperty('--m-acc-light', accLight);
+  mockRoot.style.setProperty('--m-comp', comp);
+
+  if (fireScene && syncToggle.classList.contains('on')) {
+    setHeroPalette(pickerHex);
+  }
+}
+
+function initPicker() {
+  [sliderHue, sliderSat, sliderLight].forEach(sl => sl.addEventListener('input', () => updatePicker(true)));
+  document.querySelectorAll('#presetRow .preset').forEach(p => {
+    p.addEventListener('click', () => {
+      sliderHue.value = p.dataset.h; sliderSat.value = p.dataset.s; sliderLight.value = p.dataset.l;
+      updatePicker(true);
+    });
+  });
+  syncToggle.addEventListener('click', () => {
+    const on = syncToggle.classList.toggle('on');
+    syncToggle.setAttribute('aria-checked', String(on));
+    updatePicker(on);
+  });
+  document.getElementById('btnCopyHex').addEventListener('click', async (e) => {
+    await copyText(pickerHex);
+    toast('HEX disalin: <b>' + pickerHex + '</b>');
+    const b = e.currentTarget;
+    b.textContent = '✓ Tersalin';
+    b.classList.add('done');
+    setTimeout(() => { b.textContent = 'Salin HEX'; b.classList.remove('done'); }, 1200);
+  });
+  updatePicker(false);
+}
+
+/* Mockup mode tabs */
+function initMockTabs() {
+  const stages = document.querySelectorAll('.mock-stage');
+  document.querySelectorAll('#mockTabs .mock-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#mockTabs .mock-tab').forEach(x => x.classList.toggle('active', x === t));
+      stages.forEach(s => s.classList.toggle('active', s.dataset.stage === t.dataset.mode));
+    });
+  });
+}
+
+/* =========================================================
+   MODE A — PERSONALITY QUIZ
+========================================================= */
+const QA_RESULTS = {
+  royal:     { name: 'Royal Blue Visionary',  hex: '#2F69FF', desc: 'Anda pemimpin alami yang berwibawa. Ide besar datang dengan kepercayaan penuh, dan orang lain mengikuti kompas Anda. Anda menghargai struktur, prestasi, dan standar tinggi — namun tetap hangat bagi tim yang Anda bina.' },
+  midnight:  { name: 'Midnight Deep Thinker', hex: '#191970', desc: 'Kedalaman adalah kekuatan Anda. Anda reflektif, analitis, dan menikmati sunyi malam untuk berpikir paling jernih. Kemewahan Anda bersifat intelektual — tenang di permukaan, kompleks di kedalaman.' },
+  turquoise: { name: 'Turquoise Creative',    hex: '#40E0D0', desc: 'Anda perpaduan segar antara logika dan imajinasi. Ide mengalir dari mana-mana; Anda mudah beradaptasi, hangat, dan menghadirkan kesegaran tropis di setiap ruang yang Anda masuki.' },
+  sky:       { name: 'Sky Blue Harmonizer',   hex: '#87CEEB', desc: 'Anda penenang sejati. Kehadiran Anda membuat ruang terasa lebih lapang, terang, dan aman. Anda mengutamakan keseimbangan, empati, dan keharmonisan — dalam tim maupun dalam hidup.' }
+};
+const QA_QUESTIONS = [
+  { q: 'Suasana waktu favorit Anda?', opts: [
+    { t: 'Fajar biru di tepi pantai', k: 'sky' },
+    { t: 'Tengah malam yang sunyi', k: 'midnight' },
+    { t: 'Senja di atas kota besar', k: 'royal' },
+    { t: 'Pagi di laguna tropis', k: 'turquoise' } ] },
+  { q: 'Gaya pemecahan masalah Anda?', opts: [
+    { t: 'Rencana sistematis bertahap', k: 'midnight' },
+    { t: 'Keputusan cepat & tegas', k: 'royal' },
+    { t: 'Brainstorm bebas tanpa batas', k: 'turquoise' },
+    { t: 'Menjaga harmoni seluruh tim', k: 'sky' } ] },
+  { q: 'Ruang kerja ideal Anda?', opts: [
+    { t: 'Meja menghadap langit terbuka', k: 'sky' },
+    { t: 'Studio sunyi minimalis', k: 'midnight' },
+    { t: 'Kantor korporat ramping', k: 'royal' },
+    { t: 'Ruang kreatif penuh warna', k: 'turquoise' } ] },
+  { q: 'Di mana energi sosial Anda?', opts: [
+    { t: 'Pendengar tenang di balik layar', k: 'midnight' },
+    { t: 'Pembawa visi di depan panggung', k: 'royal' },
+    { t: 'Penenang & pemersatu kelompok', k: 'sky' },
+    { t: 'Inisiator ide-ide berani', k: 'turquoise' } ] }
+];
+let qaIdx = 0;
+const qaVotes = { royal: 0, midnight: 0, turquoise: 0, sky: 0 };
+
+function qaRender() {
+  document.getElementById('qaProgress').textContent = `PERTANYAAN ${qaIdx + 1} / ${QA_QUESTIONS.length}`;
+  document.getElementById('qaText').textContent = QA_QUESTIONS[qaIdx].q;
+  const host = document.getElementById('qaOpts');
+  host.innerHTML = QA_QUESTIONS[qaIdx].opts.map((o, i) => `<button class="q-opt" data-k="${o.k}">${o.t}</button>`).join('');
+  host.querySelectorAll('.q-opt').forEach(b => {
+    b.addEventListener('click', () => {
+      if (host.dataset.busy) return;
+      host.dataset.busy = '1';
+      host.querySelectorAll('.q-opt').forEach(x => x.classList.toggle('pick', x === b));
+      qaVotes[b.dataset.k]++;
+      setTimeout(() => {
+        delete host.dataset.busy;
+        qaIdx++;
+        qaIdx < QA_QUESTIONS.length ? qaRender() : qaShowResult();
+      }, 260);
+    });
+  });
+}
+function qaShowResult() {
+  let best = 'royal';
+  for (const k of ['midnight', 'turquoise', 'sky']) if (qaVotes[k] > qaVotes[best]) best = k;
+  const r = QA_RESULTS[best];
+  document.getElementById('quizAPlay').style.display = 'none';
+  document.getElementById('quizAResult').style.display = '';
+  const sw = document.getElementById('qaSwatch');
+  sw.style.background = r.hex;
+  document.getElementById('qaName').textContent = r.name;
+  document.getElementById('qaHex').textContent = r.hex;
+  document.getElementById('qaDesc').textContent = r.desc;
+}
+document.getElementById('qaApply').addEventListener('click', (e) => {
+  setHeroPalette(document.getElementById('qaHex').textContent.trim());
+  const b = e.currentTarget;
+  b.textContent = '✓ Diterapkan ke Bola 3D';
+  setTimeout(() => b.textContent = 'Terapkan Warna Kepribadian ke 3D', 1400);
+});
+document.getElementById('qaRestart').addEventListener('click', () => {
+  qaIdx = 0;
+  Object.keys(qaVotes).forEach(k => qaVotes[k] = 0);
+  document.getElementById('quizAResult').style.display = 'none';
+  document.getElementById('quizAPlay').style.display = '';
+  qaRender();
+});
+
+/* =========================================================
+   MODE B — SPECTRUM ACUITY TEST
+========================================================= */
+const QB_LEVELS = [
+  { n: 3, d: 12,  label: 'Grid 3×3 · Perbedaan kecerahan 12%' },
+  { n: 4, d: 7,   label: 'Grid 4×4 · Perbedaan kecerahan 7%' },
+  { n: 4, d: 5,   label: 'Grid 4×4 · Perbedaan kecerahan 5%' },
+  { n: 5, d: 3.5, label: 'Grid 5×5 · Perbedaan kecerahan 3,5%' },
+  { n: 5, d: 2.5, label: 'Grid 5×5 · Perbedaan kecerahan 2,5%' }
+];
+const QB_RANKS = (score) => score >= 5
+  ? { name: 'Mata Elang Ultramarine', hex: '#2F69FF', desc: 'Luar biasa — mata Anda mendeteksi deviasi warna setipis 2,5%. Itu standar ahli manajemen warna dan grading profesional.' }
+  : score >= 3
+  ? { name: 'Desainer Presisi', hex: '#0E2AC5', desc: 'Tajam di atas rata-rata. Anda mampu membedakan gradasi halus — cocok untuk pekerjaan quality control dan penyesuaian warna.' }
+  : { name: 'Penikmat Pastel', hex: '#87CEEB', desc: 'Mata Anda menikmati keindahan tanpa mikroskop — level sensitivitas rekreasi yang nyaman dan bebas tekanan.' };
+
+let qbLevel = 0, qbScore = 0, qbLock = false, qbOddIdx = -1;
+const gridC = document.getElementById('qbGrid');
+
+function qbRender() {
+  const L = QB_LEVELS[qbLevel];
+  gridC.innerHTML = '';
+  gridC.style.gridTemplateColumns = `repeat(${L.n}, 1fr)`;
+  document.getElementById('qbLevel').textContent = qbLevel + 1;
+  document.getElementById('qbScore').textContent = qbScore;
+  document.getElementById('qbDelta').textContent = 'ΔL ' + String(L.d).replace('.', ',') + '%';
+  document.getElementById('qbFeedback').textContent = `Level ${qbLevel + 1} · ${L.label}`;
+
+  const hue = 203 + Math.random() * 45;
+  const sat = 55 + Math.random() * 35;
+  const light = 40 + Math.random() * 22;
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  const oddLight = clamp(light + dir * L.d, 8, 92);
+  qbOddIdx = Math.floor(Math.random() * L.n * L.n);
+
+  for (let i = 0; i < L.n * L.n; i++) {
+    const btn = document.createElement('button');
+    btn.style.background = i === qbOddIdx
+      ? hslToHex(hue, sat, oddLight)
+      : hslToHex(hue, sat, light);
+    btn.setAttribute('aria-label', 'kotak ' + (i + 1));
+    btn.addEventListener('click', () => qbPick(btn, i === qbOddIdx));
+    gridC.appendChild(btn);
+  }
+}
+function qbUpdateHud() {
+  document.getElementById('qbScore').textContent = qbScore;
+}
+function qbPick(btn, isOdd) {
+  if (qbLock) return;
+  qbLock = true;
+  const fb = document.getElementById('qbFeedback');
+  if (isOdd) {
+    btn.classList.add('ok');
+    qbScore++;
+    fb.textContent = '✓ Tepat! Mata Anda tajam — naik ke level berikutnya.';
+    qbUpdateHud();
+    setTimeout(() => { qbLevel++; qbNext(); }, 650);
+  } else {
+    btn.classList.add('bad');
+    fb.textContent = '✗ Meleset. Kotak yang benar diberi tanda hijau, lalu lanjut.';
+    setTimeout(() => {
+      const tile = gridC.children[qbOddIdx];
+      if (tile) tile.classList.add('ok');
+    }, 500);
+    setTimeout(() => { qbLevel++; qbNext(); }, 1000);
+  }
+}
+function qbNext() {
+  qbLock = false;
+  if (qbLevel < QB_LEVELS.length) { qbRender(); return; }
+  document.getElementById('quizBPlay').style.display = 'none';
+  document.getElementById('quizBResult').style.display = '';
+  const r = QB_RANKS(qbScore);
+  document.getElementById('qbSwatch').style.background = r.hex;
+  document.getElementById('qbName').textContent = r.name;
+  document.getElementById('qbScoreLine').textContent = '5 level · Skor akurasi: ' + qbScore + '/5';
+  document.getElementById('qbDesc').textContent = r.desc;
+}
+document.getElementById('qbRestart').addEventListener('click', () => {
+  qbLevel = 0; qbScore = 0; qbLock = false;
+  document.getElementById('quizBResult').style.display = 'none';
+  document.getElementById('quizBPlay').style.display = '';
+  qbRender();
+});
+
+/* =========================================================
+   WEBGL SCENE — GRAVITY FIELD OF BLUE (THREE.JS R160)
+========================================================= */
+let sceneRef = null;
+const setHeroPalette = (hex) => { if (sceneRef) sceneRef.setHeroPalette(hex); };
+window.setHeroPalette = setHeroPalette;
+window.applyCustomBlueToScene = setHeroPalette;
+
+function buildScene(ballColor) {
+  const container = document.getElementById('sceneShell');
+  const oldCanvas = container.querySelector('canvas');
+  if (oldCanvas) oldCanvas.remove();
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight || 1, 0.1, 100);
+  camera.position.set(0, 0, 11);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const hemiLight = new THREE.HemisphereLight(0xffffff, new THREE.Color(ballColor), 1.6);
+  scene.add(hemiLight);
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+  keyLight.position.set(-6, 10, 8);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
+  keyLight.shadow.camera.near = 0.5;
+  keyLight.shadow.camera.far = 30;
+  keyLight.shadow.camera.left = -8;
+  keyLight.shadow.camera.right = 8;
+  keyLight.shadow.camera.top = 8;
+  keyLight.shadow.camera.bottom = -8;
+  keyLight.shadow.bias = -0.0003;
+  keyLight.shadow.radius = 12.0;
+  scene.add(keyLight);
+
+  const rimLight = new THREE.DirectionalLight(0xffffff, 1.25);
+  rimLight.position.set(8, 7, -8);
+  scene.add(rimLight);
+
+  const frontLight = new THREE.DirectionalLight(0xffffff, 0.4);
+  frontLight.position.set(0, 0, 11);
+  scene.add(frontLight);
+
+  const sideBounceLight = new THREE.DirectionalLight(0xffffff, 0.3);
+  sideBounceLight.position.set(-9, -2, 4);
+  scene.add(sideBounceLight);
+
+  let viewportWidth = 10;
+  let viewportHeight = 6;
+  const updateFrustumBounds = () => {
+    const fovRad = THREE.MathUtils.degToRad(camera.fov);
+    viewportHeight = 2 * Math.tan(fovRad / 2) * camera.position.z;
+    viewportWidth = viewportHeight * (container.clientWidth / container.clientHeight);
+  };
+  updateFrustumBounds();
+
+  const isMobile = window.innerWidth < 768;
+  const ballCount = isMobile ? 54 : 96;
+
+  /* Palette */
+  const getDynamicColors = (baseColor) => {
+    const hex = baseColor.toLowerCase();
+    if (hex === '#e1fc03') {
+      return { pastel: new THREE.Color('#FBFFE2'), light: new THREE.Color('#EFFE69'),
+        medium: new THREE.Color('#E1FC03'), deep: new THREE.Color('#B1E200'), glass: new THREE.Color('#DCFF32') };
+    } else if (hex === '#ffc5c2' || hex === '#ffa19e') {
+      return { pastel: new THREE.Color('#FFF5F4'), light: new THREE.Color('#FFECEB'),
+        medium: new THREE.Color('#FFA6B3'), deep: new THREE.Color('#FF4D6D'), glass: new THREE.Color('#FFA6B3') };
+    } else if (hex === '#96e5ff') {
+      return { pastel: new THREE.Color('#F0F9FF'), light: new THREE.Color('#C9F1FF'),
+        medium: new THREE.Color('#96E5FF'), deep: new THREE.Color('#2BA5FF'), glass: new THREE.Color('#98E4FF') };
+    } else if (hex === '#2f69ff') {
+      return { pastel: new THREE.Color('#ECEFFF'), light: new THREE.Color('#A8C1FF'),
+        medium: new THREE.Color('#2F69FF'), deep: new THREE.Color('#0A33BF'), glass: new THREE.Color('#4D80FF') };
+    } else if (hex === '#141414' || hex === '#000000') {
+      return { pastel: new THREE.Color('#D8D8D8'), light: new THREE.Color('#555555'),
+        medium: new THREE.Color('#242424'), deep: new THREE.Color('#0A0A0A'), glass: new THREE.Color('#1F1F1F') };
+    }
+    const c = new THREE.Color(baseColor);
+    return { pastel: c.clone().offsetHSL(0, -0.15, 0.25), light: c.clone().offsetHSL(0, -0.05, 0.12),
+      medium: c.clone(), deep: c.clone().offsetHSL(0.01, 0.1, -0.12), glass: c.clone() };
+  };
+
+  const palette = getDynamicColors(ballColor);
+  const isBlack = ['#141414', '#18181b', '#000000'].includes(ballColor.toLowerCase());
+
+  let palHero = palette;
+  let palHeroTarget = null;
+  let palLime = getDynamicColors('#96E5FF');
+  let palPink = getDynamicColors('#2F69FF');
+  const ROLES = ['pastel', 'light', 'medium', 'deep', 'glass'];
+  const curPal = { pastel: new THREE.Color(), light: new THREE.Color(), medium: new THREE.Color(),
+    deep: new THREE.Color(), glass: new THREE.Color() };
+
+  /* Spheres */
+  const sphereGeometry = new THREE.SphereGeometry(1, 48, 48);
+  const balls = [];
+  for (let i = 0; i < ballCount; i++) {
+    let radius = 0.33;
+    const rand = Math.random();
+    if (rand < 0.3) radius = 0.27 + Math.random() * 0.12;
+    else if (rand < 0.8) radius = 0.42 + Math.random() * 0.18;
+    else radius = 0.66 + Math.random() * 0.21;
+
+    const mass = Math.pow(radius, 3);
+
+    let chosenColor = palette.medium;
+    let color = palette.medium;
+    let sphereMat;
+    let role = 'medium';
+
+    const isGlass = Math.random() < 0.22 && !isBlack;
+
+    if (isGlass) {
+      sphereMat = new THREE.MeshPhysicalMaterial({
+        color: palette.glass, roughness: 0.08, metalness: 0.0,
+        clearcoat: 1.0, clearcoatRoughness: 0.03, transmission: 0.95,
+        ior: 1.485, thickness: 2.2,
+        specularColor: new THREE.Color('#ffffff'), specularIntensity: 1.0,
+        attenuationColor: palette.pastel, attenuationDistance: 1.0,
+        emissive: palette.glass, emissiveIntensity: 0.12,
+        transparent: true
+      });
+      color = palette.glass;
+      role = 'glass';
+    } else {
+      const colorRand = Math.random();
+      if (colorRand < 0.25) { chosenColor = palette.pastel; role = 'pastel'; }
+      else if (colorRand < 0.55) { chosenColor = palette.light; role = 'light'; }
+      else if (colorRand < 0.85) { chosenColor = palette.medium; role = 'medium'; }
+      else { chosenColor = palette.deep; role = 'deep'; }
+
+      sphereMat = new THREE.MeshPhysicalMaterial({
+        color: chosenColor, roughness: 0.44, metalness: 0.0,
+        clearcoat: 0.24, clearcoatRoughness: 0.35,
+        emissive: isBlack ? new THREE.Color('#000000') : chosenColor,
+        emissiveIntensity: isBlack ? 0.0 : 0.08,
+        transparent: true
+      });
+      color = chosenColor;
+    }
+
+    const group = new THREE.Group();
+    const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMat);
+    sphereMesh.scale.setScalar(radius);
+    sphereMesh.castShadow = true;
+    sphereMesh.receiveShadow = true;
+    group.add(sphereMesh);
+    scene.add(group);
+
+    balls.push({
+      id: i, radius, mass,
+      position: new THREE.Vector3(0, 0, 0),
+      velocity: new THREE.Vector3(),
+      meshGroup: group, sphere: sphereMesh, material: sphereMat, role, isGlass,
+      visualScale: radius, color,
+      restPosition: new THREE.Vector3(0, 0, 0),
+      shapeTarget: new THREE.Vector3(),
+      angleY: Math.random() * Math.PI * 2,
+      angleZ: 0.1 + Math.random() * 0.45
+    });
+  }
+
+  const meanRadius = balls.reduce((sum, b) => sum + b.radius, 0) / balls.length;
+  let shapeScale = 1;
+
+  /* Heart silhouette + entrance scatter */
+  const inHeart = (x, y) => {
+    const a = x * x + y * y - 1;
+    return a * a * a - x * x * y * y * y <= 0;
+  };
+  const assignHeartTargets = () => {
+    const S = Math.min(viewportWidth * 0.30, viewportHeight * 0.27);
+    const baseCY = -viewportHeight * 0.03;
+    shapeScale = Math.max(0.3, Math.min(1, (S * 0.45 / 2.3) / meanRadius));
+    for (let i = 0; i < balls.length; i++) {
+      let x = 0, y = 0, tries = 0;
+      do {
+        x = (Math.random() * 2 - 1) * 1.25;
+        y = Math.random() * 2.55 - 1.4;
+        tries++;
+      } while (!inHeart(x, y) && tries < 60);
+      balls[i].shapeTarget.set(x * S, (y + 0.12) * S + baseCY, (Math.random() - 0.5) * 0.35);
+    }
+  };
+  assignHeartTargets();
+
+  const scatterFar = (withInwardVelocity) => {
+    const R = Math.max(viewportWidth, viewportHeight) * 1.5;
+    for (const b of balls) {
+      const a = Math.random() * Math.PI * 2;
+      const px = Math.cos(a) * R * 1.25;
+      const py = Math.sin(a) * R * 0.85;
+      const pz = (Math.random() - 0.5) * 4;
+      b.position.set(px, py, pz);
+      b.meshGroup.position.copy(b.position);
+      if (withInwardVelocity) {
+        b.velocity.set(-px, -py, -pz).normalize().multiplyScalar(0.08 + Math.random() * 0.05);
+      } else {
+        b.velocity.set(0, 0, 0);
+      }
+    }
+  };
+  scatterFar(false);
+
+  const params = {
+    gravity: 0, rebound: -0.3,
+    mouseRepelForce: 0.05, mouseRepelRadius: 4.4,
+    damping: 0.91, centerAttractForce: 0.0035, bounciness: 0.02
+  };
+
+  const mouseProjVec = new THREE.Vector3();
+  const mouseWorld3D = new THREE.Vector3();
+  const updateMouse3D = () => {
+    if (!mousePos) return;
+    mouseProjVec.set(mousePos.x, mousePos.y, 0.5);
+    mouseProjVec.unproject(camera);
+    const dir = mouseProjVec.sub(camera.position).normalize();
+    const distance = -camera.position.z / dir.z;
+    mouseWorld3D.copy(camera.position).add(dir.multiplyScalar(distance));
+  };
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const smoothstep = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  let animationFrameId = 0;
+  const clock = new THREE.Clock();
+  let localStarted = false;
+  let entranceStart = 0;
+  let reportedReady = false;
+  const onReady = () => { /* scene warm-up acknowledgement */ };
+
+  const diffVec = new THREE.Vector3();
+  const collideDiff = new THREE.Vector3();
+  const relVel = new THREE.Vector3();
+  const deltaPos = new THREE.Vector3();
+  const rotAxis = new THREE.Vector3();
+  const prevMouseWorld = new THREE.Vector3();
+  let mouseSpeed = 0;
+
+  const simulateAndRender = () => {
+    animationFrameId = requestAnimationFrame(simulateAndRender);
+
+    const time = clock.getElapsedTime();
+    clock.getDelta();
+    updateMouse3D();
+
+    const ctrl = control;
+
+    if (ctrl?.started && !localStarted) {
+      localStarted = true;
+      entranceStart = time;
+      scatterFar(true);
+    }
+
+    if (!localStarted) {
+      renderer.render(scene, camera);
+      if (!reportedReady) { reportedReady = true; onReady(); }
+      return;
+    }
+
+    const progress = ctrl?.progress ?? 0;
+
+    const heroF = 1 - smoothstep(0.30, 0.80, progress);
+    const dropRaw = smoothstep(0.40, 0.95, progress);
+    const flyF = smoothstep(2.7, 3.45, progress);
+    const shapeF = smoothstep(1.40, 2.05, progress) * (1 - smoothstep(2.55, 3.0, progress));
+    const dropF = dropRaw * (1 - smoothstep(1.25, 1.75, progress));
+
+    const bLime = smoothstep(0.55, 1.05, progress);
+    const bPink = smoothstep(1.40, 1.95, progress);
+    if (palHeroTarget) {
+      let settled = true;
+      for (const role of ROLES) {
+        palHero[role].lerp(palHeroTarget[role], 0.08);
+        if (Math.abs(palHero[role].r - palHeroTarget[role].r) +
+            Math.abs(palHero[role].g - palHeroTarget[role].g) +
+            Math.abs(palHero[role].b - palHeroTarget[role].b) > 0.004) settled = false;
+      }
+      if (settled) { for (const role of ROLES) palHero[role].copy(palHeroTarget[role]); palHeroTarget = null; }
+    }
+    for (const role of ROLES) {
+      curPal[role].copy(palHero[role]).lerp(palLime[role], bLime).lerp(palPink[role], bPink);
+    }
+    hemiLight.groundColor.copy(curPal.medium);
+
+    const entranceT = easeOutCubic(clamp01((time - entranceStart) / 2.2));
+    const attractionBoost = lerp(7.5, 1, entranceT);
+
+    const isMouseInteracting = !!mousePos &&
+      (Math.abs(mousePos.x) < 0.99 || Math.abs(mousePos.y) < 0.99);
+
+    mouseSpeed = isMouseInteracting ? mouseWorld3D.distanceTo(prevMouseWorld) : 0;
+    if (mouseSpeed > 3) mouseSpeed = 3;
+    prevMouseWorld.copy(mouseWorld3D);
+
+    let damping = 0.91;
+    damping = lerp(damping, 0.992, dropF);
+    damping = lerp(damping, 0.90, shapeF);
+    damping = lerp(damping, 0.985, flyF);
+
+    const camZ = camera.position.z;
+    const clusterActive = Math.max(heroF, entranceT < 1 ? 1 : 0);
+
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+
+      if (heroF > 0.01) {
+        b.velocity.x += Math.sin(time * 0.4 + b.id * 1.5) * 0.0004 * b.radius * heroF;
+        b.velocity.y += Math.cos(time * 0.5 + b.id * 1.2) * 0.0004 * b.radius * heroF;
+        b.velocity.z += Math.sin(time * 0.35 + b.id) * 0.0001 * heroF;
+      }
+
+      const clusterStrength = params.centerAttractForce * attractionBoost * clusterActive;
+      if (clusterStrength > 0.00001) {
+        b.velocity.x += (0 - b.position.x) * clusterStrength * 0.38;
+        b.velocity.y += (0 - b.position.y) * clusterStrength * 1.85;
+        b.velocity.z += (0 - b.position.z) * clusterStrength * 1.8;
+      }
+
+      if (dropF > 0.001) {
+        b.velocity.y -= 0.011 * dropF;
+      }
+
+      if (shapeF > 0.001) {
+        const k = 0.06 * shapeF;
+        b.velocity.x += (b.shapeTarget.x - b.position.x) * k;
+        b.velocity.y += (b.shapeTarget.y - b.position.y) * k;
+        b.velocity.z += (b.shapeTarget.z - b.position.z) * k;
+      }
+
+      if (flyF > 0.001) {
+        const stagger = (b.id * 0.6180339887) % 1;
+        const local = smoothstep(stagger * 0.55, stagger * 0.55 + 0.45, flyF);
+        b.velocity.z += 0.05 * local;
+        b.velocity.x += b.position.x * 0.006 * local;
+        b.velocity.y += b.position.y * 0.006 * local;
+      }
+
+      if (mousePos && isMouseInteracting) {
+        diffVec.subVectors(b.position, mouseWorld3D);
+        const rawDist = diffVec.length();
+        const down = mousePos.isDown;
+        const activeRepelRadius = down ? params.mouseRepelRadius * 1.4 : params.mouseRepelRadius;
+        const activeRepelForce = down ? params.mouseRepelForce * 1.7 : params.mouseRepelForce;
+        if (rawDist < activeRepelRadius && rawDist > 0.0001) {
+          const ratio = rawDist / activeRepelRadius;
+          const smoothFactor = 1.0 - (ratio * ratio * (3.0 - 2.0 * ratio));
+          const speedBoost = 1 + mouseSpeed * 3.2;
+          const push = smoothFactor * activeRepelForce * speedBoost;
+          diffVec.normalize();
+          diffVec.z *= 0.12;
+          diffVec.normalize();
+          b.velocity.addScaledVector(diffVec, push);
+        }
+      }
+
+      b.velocity.multiplyScalar(damping);
+      b.position.addScaledVector(b.velocity, 1);
+
+      const c = b.isGlass ? curPal.glass : curPal[b.role];
+      b.material.color.copy(c);
+      if (!isBlack) b.material.emissive.copy(c);
+
+      b.material.opacity = flyF > 0.001
+        ? 1 - smoothstep(camZ - 2.6, camZ - 0.3, b.position.z)
+        : 1;
+
+      const targetVis = b.radius * (1 - (1 - shapeScale) * shapeF);
+      b.visualScale += (targetVis - b.visualScale) * 0.12;
+      b.sphere.scale.setScalar(b.visualScale);
+    }
+
+    const collideScale = 0.28 * (1 - 0.93 * shapeF) * (1 - flyF);
+    const subSteps = 4;
+    for (let step = 0; step < subSteps; step++) {
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          const b1 = balls[i];
+          const b2 = balls[j];
+          collideDiff.subVectors(b2.position, b1.position);
+          const dist = collideDiff.length();
+          const minDist = b1.visualScale + b2.visualScale;
+          if (dist < minDist && dist > 0.001) {
+            const overlap = minDist - dist;
+            collideDiff.multiplyScalar(1 / dist);
+            const totalMass = b1.mass + b2.mass;
+            const ratio1 = b2.mass / totalMass;
+            const ratio2 = b1.mass / totalMass;
+            b1.position.addScaledVector(collideDiff, -overlap * ratio1 * collideScale);
+            b2.position.addScaledVector(collideDiff, overlap * ratio2 * collideScale);
+
+            relVel.subVectors(b2.velocity, b1.velocity);
+            const velAlongNormal = relVel.dot(collideDiff);
+            if (velAlongNormal < -0.0001) {
+              const impulse = -(1 + params.bounciness) * velAlongNormal / (1 / b1.mass + 1 / b2.mass);
+              b1.velocity.addScaledVector(collideDiff, -impulse / b1.mass);
+              b2.velocity.addScaledVector(collideDiff, impulse / b2.mass);
+            }
+          }
+        }
+      }
+    }
+
+    const borderPad = 0.2;
+    const xBound = viewportWidth / 2 - borderPad;
+    const topY = viewportHeight / 2 - 0.05;
+    const floorY = -viewportHeight / 2 + 0.05;
+    const zBound = 2.0;
+    const restitution = 0.30 + 0.35 * dropF;
+
+    const contain = flyF < 0.5;
+    const zContain = flyF < 0.02;
+
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+      const r = b.visualScale;
+
+      if (contain) {
+        if (b.position.x < -xBound - r) { b.position.x = -xBound - r; b.velocity.x *= params.rebound; }
+        else if (b.position.x > xBound + r) { b.position.x = xBound + r; b.velocity.x *= params.rebound; }
+
+        if (b.position.y - r < floorY) {
+          b.position.y = floorY + r;
+          if (b.velocity.y < 0) b.velocity.y = -b.velocity.y * restitution;
+          if (dropF > 0.3) { b.velocity.x *= 0.86; b.velocity.z *= 0.86; }
+        }
+        if (b.position.y + r > topY) {
+          b.position.y = topY - r;
+          if (b.velocity.y > 0) b.velocity.y *= params.rebound;
+        }
+      }
+
+      if (zContain) {
+        if (b.position.z < -zBound) { b.position.z = -zBound; b.velocity.z *= params.rebound; }
+        else if (b.position.z > zBound) { b.position.z = zBound; b.velocity.z *= params.rebound; }
+      }
+
+      deltaPos.copy(b.position).sub(b.meshGroup.position);
+      if (deltaPos.lengthSq() > 0.000001) {
+        rotAxis.set(deltaPos.y, -deltaPos.x, 0).normalize();
+        const rotAngle = (deltaPos.length() / b.radius) * 0.95;
+        b.meshGroup.rotateOnWorldAxis(rotAxis, rotAngle);
+      }
+      b.meshGroup.position.copy(b.position);
+    }
+
+    renderer.render(scene, camera);
+    if (!reportedReady) { reportedReady = true; onReady(); }
+  };
+  simulateAndRender();
+
+  const handleResize = () => {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+    updateFrustumBounds();
+    assignHeartTargets();
+  };
+  const ro = new ResizeObserver(handleResize);
+  ro.observe(container);
+
+  return {
+    dispose() {
+      cancelAnimationFrame(animationFrameId);
+      ro.disconnect();
+      scene.traverse(o => { if (o.isMesh) o.material && o.material.dispose?.(); });
+      sphereGeometry.dispose();
+      renderer.dispose();
+      canvas.remove();
+    },
+    setHeroPalette(hex) { palHeroTarget = getDynamicColors(hex); }
+  };
+}
+function rebuildScene(ballColor) {
+  if (sceneRef) sceneRef.dispose();
+  sceneRef = buildScene(ballColor);
+}
+
+/* =========================================================
+   LOADER
+========================================================= */
+const loaderEl = document.getElementById('loader');
+const loaderStatus = document.getElementById('loaderStatus');
+const loaderFill = document.getElementById('loaderFill');
+const loaderCount = document.getElementById('loaderCount');
+const LOADER_DURATION = 2400;
+const LOADER_T0 = performance.now();
+
+function tickLoader() {
+  const elapsed = performance.now() - LOADER_T0;
+  const p = Math.min(1, elapsed / LOADER_DURATION);
+  const eased = 1 - Math.pow(1 - p, 2.4);
+  const pct = Math.round(eased * 100);
+  loaderFill.style.width = pct + '%';
+  loaderCount.textContent = String(pct).padStart(3, '0') + '%';
+  loaderStatus.textContent = pct < 100 ? 'Mengkalibrasi spektrum biru' : 'Memasuki kedalaman pigmen';
+  if (p < 1) requestAnimationFrame(tickLoader);
+  else {
+    control.started = true;
+    document.body.classList.remove('locked');
+    document.getElementById('siteHeader').classList.add('in');
+    document.querySelectorAll('.hero-inner .en').forEach(el => el.classList.add('in'));
+    loaderEl.classList.add('done');
+    setTimeout(() => loaderEl.remove(), 850);
+  }
+}
+
+/* =========================================================
+   BOOT
+========================================================= */
+function boot() {
+  rebuildScene(THEMES[0].ball);
+  renderCatalog();
+  renderThemeCards();
+  renderMarquee();
+  initReveals();
+  initTopicPills();
+  initColorChips();
+  initPicker();
+  initMockTabs();
+  initHeaderContrast();
+  bindTabs('#paletteTabs', '.pane', 'active');
+  bindTabs('.quiz-tabs', '.quiz-pane', 'active');
+  qaRender();
+  qbRender();
+  requestAnimationFrame(scrollRaf);
+  requestAnimationFrame(tickLoader);
+}
+boot();
+</script>
+</body>
+</html>
